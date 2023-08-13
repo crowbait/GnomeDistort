@@ -182,11 +182,14 @@ juce::AudioProcessorValueTreeState::ParameterLayout GnomeDistortAudioProcessor::
     layout.add(std::make_unique<juce::AudioParameterFloat>("PreHiCutFreq", "PreHiCutFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.75f), 20000.f));
     layout.add(std::make_unique<juce::AudioParameterChoice>("PreHiCutSlope", "PreHiCutSlope", slopeOptions, 1));
     layout.add(std::make_unique<juce::AudioParameterFloat>("PrePeakFreq", "PrePeakFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.75f), 750.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("PrePeakGain", "PrePeakGain", juce::NormalisableRange<float>(-24.f, 24.f, 0.25f, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("PrePeakGain", "PrePeakGain", juce::NormalisableRange<float>(-24.f, 64.f, 0.25f, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("PrePeakQ", "PrePeakQ", juce::NormalisableRange<float>(-0.1f, 10.f, 0.05f, 1.f), 1.f));
 
     // distortion specific parameters
-    layout.add(std::make_unique<juce::AudioParameterFloat>("DistAmount", "DistAmount", juce::NormalisableRange<float>(0.f, 100.f, 0.1f, 0.5f), 1.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("PreGain", "PreGain", juce::NormalisableRange<float>(-48.f, 48.f, 0.5f, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("WaveShapeAmount", "WaveShapeAmount", juce::NormalisableRange<float>(0.f, 100.f, 0.1f, 0.5f), 1.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("ConvolutionAmount", "ConvolutionAmount", juce::NormalisableRange<float>(0.f, 100.f, 0.1f, 0.5f), 1.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("PostGain", "PostGain", juce::NormalisableRange<float>(-48.f, 48.f, 0.5f, 1.f), 0.f));
 
     // post-filter paramters
     layout.add(std::make_unique<juce::AudioParameterFloat>("PostLoCutFreq", "PostLoCutFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.75f), 20.f));
