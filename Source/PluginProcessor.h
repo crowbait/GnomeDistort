@@ -60,6 +60,18 @@ public:
     juce::AudioProcessorValueTreeState treeState{ *this, nullptr, "Parameters", createParameterLayout() };
 
 private:
+    using Filter = juce::dsp::IIR::Filter<float>;   // alias for Filters
+    using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;     // ProcessorChain which allows to automatically run signal through all specified DSP instances (4 filter slope types)
+    using Gain = juce::dsp::Gain<float>;
+
+    using MonoPreFilter = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter>;    // ProcessorChain automatically running all three pre-dist EQ Filters
+    using MonoDistWaveShape = juce::dsp::WaveShaper<float>;
+    using MonoDistConv = juce::dsp::Convolution;
+    using MonoPostFilter = juce::dsp::ProcessorChain<CutFilter, CutFilter>;
+
+    using MonoChain = juce::dsp::ProcessorChain<MonoPreFilter, Gain, MonoDistWaveShape, MonoDistConv, Gain, MonoPostFilter>;    // complete effect chain for one channel
+    MonoChain leftChain, rightChain;    // stereo
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GnomeDistortAudioProcessor)
 };

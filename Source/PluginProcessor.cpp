@@ -79,6 +79,14 @@ void GnomeDistortAudioProcessor::changeProgramName(int index, const juce::String
 void GnomeDistortAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+
+    // initializing ProcessorChains with provided specifications
+    juce::dsp::ProcessSpec spec;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.numChannels = 1;
+    spec.sampleRate = sampleRate;
+    leftChain.prepare(spec);
+    rightChain.prepare(spec);
 }
 
 void GnomeDistortAudioProcessor::releaseResources() {
