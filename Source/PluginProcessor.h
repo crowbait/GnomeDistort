@@ -94,9 +94,7 @@ private:
 
     using Coefficients = Filter::CoefficientsPtr;
     static void updateCoefficients(Coefficients& old, const Coefficients& replace);
-
     static void updateSettings(ChainSettings& chainSettings, double sampleRate, MonoChain& leftChain, MonoChain& rightChain);
-
     // template function can be used on left AND right channel
     template<typename ChainType, typename CoefficientsType> static void updateCutFilter(ChainType& leftLoCut, const CoefficientsType& cutCoefficients, const FilterSlope& slope) {
         leftLoCut.template setBypassed<0>(true);     // bypass all 4 possible filters (one for every possible slope)

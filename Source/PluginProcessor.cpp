@@ -148,12 +148,6 @@ void GnomeDistortAudioProcessor::prepareToPlay(double sampleRate, int samplesPer
     // init settings
     ChainSettings chainSettings = getChainSettings(apvts);
     updateSettings(chainSettings, sampleRate, leftChain, rightChain);
-
-    // links low cut filter coefficient
-
-
-
-
 }
 
 void GnomeDistortAudioProcessor::releaseResources() {
@@ -203,30 +197,6 @@ void GnomeDistortAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, 
     // prepare settings before processing audio
     ChainSettings chainSettings = getChainSettings(apvts);
     updateSettings(chainSettings, getSampleRate(), leftChain, rightChain);
-
-    // links low cut filter coefficient
-    auto cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(     // create array of filter coefficients for 4 possible slopes
-        chainSettings.LoCutFreq, getSampleRate(), (chainSettings.LoCutSlope + 1) * 2);
-    auto& leftLoCut = leftChain.get<ChainPositions::LoCut>();
-    leftLoCut.setBypassed<0>(true);     // bypass all 4 possible filters (one for every possible slope)
-    leftLoCut.setBypassed<1>(true);
-    leftLoCut.setBypassed<2>(true);
-    leftLoCut.setBypassed<3>(true);
-    switch (chainSettings.LoCutSlope) {
-        case Slope12:
-            *leftLoCut.get<0>().coefficients = *cutCoefficients[0]; leftLoCut.setBypassed<0>(false); break;
-        case Slope24:
-            *leftLoCut.get<0>().coefficients = *cutCoefficients[0]; leftLoCut.setBypassed<0>(false);
-            *leftLoCut.get<1>().coefficients = *cutCoefficients[1]; leftLoCut.setBypassed<0>(false); break;
-        case Slope36:
-            *leftLoCut.get<0>().coefficients = *cutCoefficients[0]; leftLoCut.setBypassed<0>(false);
-            *leftLoCut.get<1>().coefficients = *cutCoefficients[1]; leftLoCut.setBypassed<1>(false);
-            *leftLoCut.get<2>().coefficients = *cutCoefficients[2]; leftLoCut.setBypassed<2>(false); break;
-        case Slope48:
-            *leftLoCut.get<0>().coefficients = *cutCoefficients[0]; leftLoCut.setBypassed<0>(false);
-            *leftLoCut.get<1>().coefficients = *cutCoefficients[1]; leftLoCut.setBypassed<1>(false);
-            *leftLoCut.get<2>().coefficients = *cutCoefficients[2]; leftLoCut.setBypassed<2>(false);
-    }
 
     // run audio through ProcessorChain
     juce::dsp::AudioBlock<float> block(buffer);                             // separating left and right channel
@@ -287,10 +257,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout GnomeDistortAudioProcessor::
     layout.add(std::make_unique<juce::AudioParameterFloat>("HiCutFreq", "HiCutFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 20000.f));
     layout.add(std::make_unique<juce::AudioParameterChoice>("HiCutSlope", "HiCutSlope", slopeOptions, 1));
     // distortion specific parameters
-    layout.add(std::make_unique<juce::AudioParameterFloat>("PreGain", "PreGain", juce::NormalisableRange<float>(-48.f, 48.f, 0.5f, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("PreGain", "PreGain", juce::NormalisableRange<float>(-24.f, 48.f, 0.5f, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("WaveShapeAmount", "WaveShapeAmount", juce::NormalisableRange<float>(0.f, 100.f, 0.1f, 0.5f), 1.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("ConvolutionAmount", "ConvolutionAmount", juce::NormalisableRange<float>(0.f, 100.f, 0.1f, 0.5f), 1.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("PostGain", "PostGain", juce::NormalisableRange<float>(-48.f, 48.f, 0.5f, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("PostGain", "PostGain", juce::NormalisableRange<float>(-24.f, 48.f, 0.5f, 1.f), 0.f));
 
     return layout;
 }
