@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="RuvOwm" name="GnomeDistort" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" version="0.0.1"
+              companyName="Crowbait" companyCopyright="&#169; 2023 Crowbait"
+              companyWebsite="crowbait.de" companyEmail="contact@crowbait.de"
+              bundleIdentifier="de.crowbait.gnomedistort" pluginFormats="buildStandalone,buildVST3"
+              pluginCharacteristicsValue="pluginWantsMidiIn" pluginManufacturerCode="CrBt"
+              pluginCode="GDst" aaxIdentifier="de.crowbait.gnomedistort" pluginVST3Category="Distortion"
+              pluginAAXCategory="8192">
   <MAINGROUP id="zxk1Cm" name="GnomeDistort">
     <GROUP id="{90ED5E9F-AA5E-20A2-C944-3AE53E8FFA07}" name="Source">
       <FILE id="NCHjNI" name="PluginProcessor.cpp" compile="1" resource="0"
