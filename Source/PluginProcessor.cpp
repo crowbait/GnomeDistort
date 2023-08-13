@@ -76,6 +76,63 @@ const juce::String GnomeDistortAudioProcessor::getProgramName(int index) {
 void GnomeDistortAudioProcessor::changeProgramName(int index, const juce::String& newName) {}
 
 //==============================================================================
+//==============================================================================
+//==============================================================================
+
+// HELPERS
+
+void GnomeDistortAudioProcessor::updateCoefficients(Coefficients& old, const Coefficients& replace) {
+    *old = *replace;
+}
+
+void GnomeDistortAudioProcessor::updateSettings(ChainSettings& chainSettings, double sampleRate, MonoChain& leftChain, MonoChain& rightChain) {
+    // link LoCut filter coefficients
+    auto LoCutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(     // create array of filter coefficients for 4 possible slopes
+        chainSettings.LoCutFreq, sampleRate, (chainSettings.LoCutSlope + 1) * 2);
+    auto& leftLoCut = leftChain.get<ChainPositions::LoCut>();
+    auto& rightLoCut = rightChain.get<ChainPositions::LoCut>();
+    updateCutFilter(leftLoCut, LoCutCoefficients, static_cast<FilterSlope>(chainSettings.LoCutSlope));
+    updateCutFilter(rightLoCut, LoCutCoefficients, static_cast<FilterSlope>(chainSettings.LoCutSlope));
+
+    // link peak filter coefficient
+    auto peakCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(
+        sampleRate, chainSettings.PeakFreq, chainSettings.PeakQ,
+        juce::Decibels::decibelsToGain(chainSettings.PeakGain)); // convert decibels to gain value
+    updateCoefficients(leftChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
+    updateCoefficients(rightChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
+
+    // link HiCut filter coefficients
+    auto HiCutCoefficients = juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(     // create array of filter coefficients for 4 possible slopes
+        chainSettings.HiCutFreq, sampleRate, (chainSettings.HiCutSlope + 1) * 2);
+    auto& leftHiCut = leftChain.get<ChainPositions::HiCut>();
+    auto& rightHiCut = rightChain.get<ChainPositions::HiCut>();
+    updateCutFilter(leftHiCut, HiCutCoefficients, static_cast<FilterSlope>(chainSettings.HiCutSlope));
+    updateCutFilter(rightHiCut, HiCutCoefficients, static_cast<FilterSlope>(chainSettings.HiCutSlope));
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts) {
+    ChainSettings settings;
+
+    settings.LoCutFreq = apvts.getRawParameterValue("LoCutFreq")->load();
+    settings.LoCutSlope = static_cast<FilterSlope>(apvts.getRawParameterValue("LoCutSlope")->load());
+    settings.PeakFreq = apvts.getRawParameterValue("PeakFreq")->load();
+    settings.PeakGain = apvts.getRawParameterValue("PeakGain")->load();
+    settings.PeakQ = apvts.getRawParameterValue("PeakQ")->load();
+    settings.HiCutFreq = apvts.getRawParameterValue("HiCutFreq")->load();
+    settings.HiCutSlope = static_cast<FilterSlope>(apvts.getRawParameterValue("HiCutSlope")->load());
+
+    settings.PreGain = apvts.getRawParameterValue("PreGain")->load();
+    settings.WaveShapeAmount = apvts.getRawParameterValue("WaveShapeAmount")->load();
+    settings.ConvolutionAmount = apvts.getRawParameterValue("ConvolutionAmount")->load();
+    settings.PostGain = apvts.getRawParameterValue("PostGain")->load();
+
+    return settings;
+}
+
 void GnomeDistortAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
@@ -87,6 +144,16 @@ void GnomeDistortAudioProcessor::prepareToPlay(double sampleRate, int samplesPer
     spec.sampleRate = sampleRate;
     leftChain.prepare(spec);
     rightChain.prepare(spec);
+
+    // init settings
+    ChainSettings chainSettings = getChainSettings(apvts);
+    updateSettings(chainSettings, sampleRate, leftChain, rightChain);
+
+    // links low cut filter coefficient
+
+
+
+
 }
 
 void GnomeDistortAudioProcessor::releaseResources() {
@@ -133,17 +200,43 @@ void GnomeDistortAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, 
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel) {
-        auto* channelData = buffer.getWritePointer(channel);
+    // prepare settings before processing audio
+    ChainSettings chainSettings = getChainSettings(apvts);
+    updateSettings(chainSettings, getSampleRate(), leftChain, rightChain);
 
-        // ..do something to the data...
+    // links low cut filter coefficient
+    auto cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(     // create array of filter coefficients for 4 possible slopes
+        chainSettings.LoCutFreq, getSampleRate(), (chainSettings.LoCutSlope + 1) * 2);
+    auto& leftLoCut = leftChain.get<ChainPositions::LoCut>();
+    leftLoCut.setBypassed<0>(true);     // bypass all 4 possible filters (one for every possible slope)
+    leftLoCut.setBypassed<1>(true);
+    leftLoCut.setBypassed<2>(true);
+    leftLoCut.setBypassed<3>(true);
+    switch (chainSettings.LoCutSlope) {
+        case Slope12:
+            *leftLoCut.get<0>().coefficients = *cutCoefficients[0]; leftLoCut.setBypassed<0>(false); break;
+        case Slope24:
+            *leftLoCut.get<0>().coefficients = *cutCoefficients[0]; leftLoCut.setBypassed<0>(false);
+            *leftLoCut.get<1>().coefficients = *cutCoefficients[1]; leftLoCut.setBypassed<0>(false); break;
+        case Slope36:
+            *leftLoCut.get<0>().coefficients = *cutCoefficients[0]; leftLoCut.setBypassed<0>(false);
+            *leftLoCut.get<1>().coefficients = *cutCoefficients[1]; leftLoCut.setBypassed<1>(false);
+            *leftLoCut.get<2>().coefficients = *cutCoefficients[2]; leftLoCut.setBypassed<2>(false); break;
+        case Slope48:
+            *leftLoCut.get<0>().coefficients = *cutCoefficients[0]; leftLoCut.setBypassed<0>(false);
+            *leftLoCut.get<1>().coefficients = *cutCoefficients[1]; leftLoCut.setBypassed<1>(false);
+            *leftLoCut.get<2>().coefficients = *cutCoefficients[2]; leftLoCut.setBypassed<2>(false);
     }
+
+    // run audio through ProcessorChain
+    juce::dsp::AudioBlock<float> block(buffer);                             // separating left and right channel
+    auto leftBlock = block.getSingleChannelBlock(0);
+    auto rightBlock = block.getSingleChannelBlock(1);
+    juce::dsp::ProcessContextReplacing<float> leftContext(leftBlock);       // create ProcessContext for both channels
+    juce::dsp::ProcessContextReplacing<float> rightContext(rightBlock);
+
+    leftChain.process(leftContext);                                         // process
+    rightChain.process(rightContext);
 }
 
 //==============================================================================
@@ -152,7 +245,8 @@ bool GnomeDistortAudioProcessor::hasEditor() const {
 }
 
 juce::AudioProcessorEditor* GnomeDistortAudioProcessor::createEditor() {
-    return new GnomeDistortAudioProcessorEditor(*this);
+    // return new GnomeDistortAudioProcessorEditor(*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -179,31 +273,24 @@ juce::AudioProcessorValueTreeState::ParameterLayout GnomeDistortAudioProcessor::
     }
 
     layout.add(std::make_unique<juce::AudioParameterFloat>(         // Type: float (=range)
-        "PreLoCutFreq", "PreLoCutFreq",                             // Parameter names
-        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.75f),  // Parameter range (20-20k, step-size 1, skew: <1 fills more of the slider with low range
+        "LoCutFreq", "LoCutFreq",                                   // Parameter names
+        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f),  // Parameter range (20-20k, step-size 1, skew: <1 fills more of the slider with low range
         20.f));                                                     // default value
-
     layout.add(std::make_unique<juce::AudioParameterChoice>(        // Type: choice
-        "PreLoCutSlope", "PreHiCutSlope",                           // Parameter names
+        "LoCutSlope", "HiCutSlope",                                 // Parameter names
         slopeOptions, 1));                                          // Choices StringArray, default index
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>("PreHiCutFreq", "PreHiCutFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.75f), 20000.f));
-    layout.add(std::make_unique<juce::AudioParameterChoice>("PreHiCutSlope", "PreHiCutSlope", slopeOptions, 1));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("PrePeakFreq", "PrePeakFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.75f), 750.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("PrePeakGain", "PrePeakGain", juce::NormalisableRange<float>(-24.f, 64.f, 0.25f, 1.f), 0.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("PrePeakQ", "PrePeakQ", juce::NormalisableRange<float>(-0.1f, 10.f, 0.05f, 1.f), 1.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("PeakFreq", "PeakFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 750.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("PeakGain", "PeakGain", juce::NormalisableRange<float>(-24.f, 64.f, 0.25f, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("PeakQ", "PeakQ", juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 1.f), 1.f));
 
+    layout.add(std::make_unique<juce::AudioParameterFloat>("HiCutFreq", "HiCutFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 20000.f));
+    layout.add(std::make_unique<juce::AudioParameterChoice>("HiCutSlope", "HiCutSlope", slopeOptions, 1));
     // distortion specific parameters
     layout.add(std::make_unique<juce::AudioParameterFloat>("PreGain", "PreGain", juce::NormalisableRange<float>(-48.f, 48.f, 0.5f, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("WaveShapeAmount", "WaveShapeAmount", juce::NormalisableRange<float>(0.f, 100.f, 0.1f, 0.5f), 1.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("ConvolutionAmount", "ConvolutionAmount", juce::NormalisableRange<float>(0.f, 100.f, 0.1f, 0.5f), 1.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("PostGain", "PostGain", juce::NormalisableRange<float>(-48.f, 48.f, 0.5f, 1.f), 0.f));
-
-    // post-filter paramters
-    layout.add(std::make_unique<juce::AudioParameterFloat>("PostLoCutFreq", "PostLoCutFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.75f), 20.f));
-    layout.add(std::make_unique<juce::AudioParameterChoice>("PostLoCutSlope", "PostLoCutSlope", slopeOptions, 1));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("PostHiCutFreq", "PostHiCutFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.75f), 20000.f));
-    layout.add(std::make_unique<juce::AudioParameterChoice>("PostHiCutSlope", "PostHiCutSlope", slopeOptions, 1));
 
     return layout;
 }
