@@ -25,7 +25,7 @@ enum WaveShaperFunction {
 };
 
 struct ChainSettings {
-    float LoCutFreq{ 0 }, PeakFreq{ 0 }, PeakGain{ 0 }, PeakQ{ 0 }, HiCutFreq{ 0 }, PreGain{ 0 }, Bias{ 0 }, WaveShapeAmount{ 0 }, ConvolutionAmount{ 0 }, PostGain{ 0 };
+    float LoCutFreq{ 0 }, PeakFreq{ 0 }, PeakGain{ 0 }, PeakQ{ 0 }, HiCutFreq{ 0 }, PreGain{ 0 }, Bias{ 0 }, WaveShapeAmount{ 0 }, PostGain{ 0 };
     int LoCutSlope{ FilterSlope::Slope12 }, HiCutSlope{ FilterSlope::Slope12 }, WaveShapeFunction{ WaveShaperFunction::HardClip };
 };
 
@@ -84,10 +84,9 @@ private:
     using Gain = juce::dsp::Gain<float>;
     using Bias = juce::dsp::Bias<float>;
     using DistWaveShape = juce::dsp::WaveShaper<float, std::function<float(float)>>;
-    using DistConv = juce::dsp::Convolution;
 
     // using MonoChain = juce::dsp::ProcessorChain<MonoPreFilter, Gain, DistWaveShape, DistConv, Gain, MonoPostFilter>;    // complete effect chain for one channel
-    using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter, Gain, Bias, DistWaveShape, Gain>;
+    using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter, Gain, Bias, DistWaveShape, Gain, Gain>;
     MonoChain leftChain, rightChain;    // stereo
 
     enum ChainPositions {
@@ -98,9 +97,7 @@ private:
         DistBias,
         DistWaveshaper,
         WaveshaperMakeupGain,
-        DistConvolution,
-        PostGain,
-        PostFilter
+        PostGain
     };
 
     using Coefficients = Filter::CoefficientsPtr;

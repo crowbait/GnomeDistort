@@ -106,6 +106,7 @@ std::function<float(float)> GnomeDistortAudioProcessor::getWaveshaperFunction(Wa
     }
 }
 
+
 void GnomeDistortAudioProcessor::updateSettings(ChainSettings& chainSettings, double sampleRate, MonoChain& leftChain, MonoChain& rightChain) {
     // link LoCut filter coefficients
     auto LoCutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(     // create array of filter coefficients for 4 possible slopes
@@ -149,6 +150,10 @@ void GnomeDistortAudioProcessor::updateSettings(ChainSettings& chainSettings, do
         leftChain.get<ChainPositions::WaveshaperMakeupGain>().setGainDecibels(makeupGain);
         rightChain.get<ChainPositions::WaveshaperMakeupGain>().setGainDecibels(makeupGain);
     }
+
+    // post-gain
+    leftChain.get<ChainPositions::PostGain>().setGainDecibels(chainSettings.PostGain);
+    rightChain.get<ChainPositions::PostGain>().setGainDecibels(chainSettings.PostGain);
 }
 
 //==============================================================================
@@ -170,7 +175,6 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts) {
     settings.Bias = apvts.getRawParameterValue("Bias")->load();
     settings.WaveShapeAmount = apvts.getRawParameterValue("WaveShapeAmount")->load();
     settings.WaveShapeFunction = static_cast<WaveShaperFunction>(apvts.getRawParameterValue("WaveShapeFunction")->load());
-    settings.ConvolutionAmount = apvts.getRawParameterValue("ConvolutionAmount")->load();
     settings.PostGain = apvts.getRawParameterValue("PostGain")->load();
 
     return settings;
@@ -192,6 +196,7 @@ void GnomeDistortAudioProcessor::prepareToPlay(double sampleRate, int samplesPer
     ChainSettings chainSettings = getChainSettings(apvts);
     updateSettings(chainSettings, sampleRate, leftChain, rightChain);
 }
+
 
 void GnomeDistortAudioProcessor::releaseResources() {
     // When playback stops, you can use this as an opportunity to free up any
@@ -321,7 +326,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout GnomeDistortAudioProcessor::
     layout.add(std::make_unique<juce::AudioParameterFloat>("Bias", "Bias", juce::NormalisableRange<float>(-1.f, 1.f, 0.01f, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("WaveShapeAmount", "WaveShapeAmount", juce::NormalisableRange<float>(0.f, 0.990f, 0.01f, 0.75f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterChoice>("WaveShapeFunction", "WaveShapeFunction", waveShaperOptions, 0));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("ConvolutionAmount", "ConvolutionAmount", juce::NormalisableRange<float>(0.f, 100.f, 0.1f, 0.5f), 1.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("PostGain", "PostGain", juce::NormalisableRange<float>(-32.f, 8.f, 0.5f, 1.f), 0.f));
 
     return layout;
