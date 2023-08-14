@@ -84,6 +84,27 @@ void GnomeDistortAudioProcessor::changeProgramName(int index, const juce::String
 void GnomeDistortAudioProcessor::updateCoefficients(Coefficients& old, const Coefficients& replace) {
     *old = *replace;
 }
+std::function<float(float)> GnomeDistortAudioProcessor::getWaveshaperFunction(WaveShaperFunction& func, float& amount) {
+    switch (func) {
+        case HardClip:
+            return [amount](float x) { return juce::jlimit(0.f - (1.f - amount), 1.f - amount, x); };
+            break;
+        case SoftClip:  // x * sqrt(1+a²) - scaling factor 5
+            return [amount](float x) { return juce::jlimit(-1.f, 1.f, x * sqrt(1 + ((amount * 5) * (amount * 5)))); };
+            break;
+        case Cracked:   // x³ * cos(x*a)³ - scaling factor 9.4
+            return [amount](float x) { return pow(x, 3) * pow((cos(x * amount * 9.4f)), 3); };
+            break;
+        case Jericho:   // x - (a/t)
+            return [amount](float x) { return juce::jlimit(-1.f, 1.f, x - (amount / x)); };
+            break;
+        case Warm:      // x < 0: x*a   --  x > 0: x*(1+a)
+            return [amount](float x) {
+                if (x <= 0) return juce::jlimit(-1.f, 1.f, x * (1.f - amount));
+                return juce::jlimit(-1.f, 1.f, x * (1.f + amount));
+                }; break;
+    }
+}
 
 void GnomeDistortAudioProcessor::updateSettings(ChainSettings& chainSettings, double sampleRate, MonoChain& leftChain, MonoChain& rightChain) {
     // link LoCut filter coefficients
@@ -108,6 +129,26 @@ void GnomeDistortAudioProcessor::updateSettings(ChainSettings& chainSettings, do
     auto& rightHiCut = rightChain.get<ChainPositions::HiCut>();
     updateCutFilter(leftHiCut, HiCutCoefficients, static_cast<FilterSlope>(chainSettings.HiCutSlope));
     updateCutFilter(rightHiCut, HiCutCoefficients, static_cast<FilterSlope>(chainSettings.HiCutSlope));
+
+    // pre-gain
+    leftChain.get<ChainPositions::PreGain>().setGainDecibels(chainSettings.PreGain);
+    rightChain.get<ChainPositions::PreGain>().setGainDecibels(chainSettings.PreGain);
+
+    // bias
+    leftChain.get<ChainPositions::DistBias>().setBias(chainSettings.Bias);
+    rightChain.get<ChainPositions::DistBias>().setBias(chainSettings.Bias);
+
+    // waveshaper
+    WaveShaperFunction waveShapeFunction = static_cast<WaveShaperFunction>(chainSettings.WaveShapeFunction);
+    auto& waveShaperFunction = getWaveshaperFunction(waveShapeFunction, chainSettings.WaveShapeAmount);
+    leftChain.get<ChainPositions::DistWaveshaper>().functionToUse = waveShaperFunction;
+    rightChain.get<ChainPositions::DistWaveshaper>().functionToUse = waveShaperFunction;
+    // makeup-gain after waveshaper for following functions
+    if (waveShapeFunction == WaveShaperFunction::HardClip) {
+        float makeupGain = 16.f * 2 * chainSettings.WaveShapeAmount * chainSettings.WaveShapeAmount;
+        leftChain.get<ChainPositions::WaveshaperMakeupGain>().setGainDecibels(makeupGain);
+        rightChain.get<ChainPositions::WaveshaperMakeupGain>().setGainDecibels(makeupGain);
+    }
 }
 
 //==============================================================================
@@ -126,7 +167,9 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts) {
     settings.HiCutSlope = static_cast<FilterSlope>(apvts.getRawParameterValue("HiCutSlope")->load());
 
     settings.PreGain = apvts.getRawParameterValue("PreGain")->load();
+    settings.Bias = apvts.getRawParameterValue("Bias")->load();
     settings.WaveShapeAmount = apvts.getRawParameterValue("WaveShapeAmount")->load();
+    settings.WaveShapeFunction = static_cast<WaveShaperFunction>(apvts.getRawParameterValue("WaveShapeFunction")->load());
     settings.ConvolutionAmount = apvts.getRawParameterValue("ConvolutionAmount")->load();
     settings.PostGain = apvts.getRawParameterValue("PostGain")->load();
 
@@ -242,6 +285,14 @@ juce::AudioProcessorValueTreeState::ParameterLayout GnomeDistortAudioProcessor::
         slopeOptions.add(str);
     }
 
+    juce::StringArray waveShaperOptions = {
+        "HardClip",
+        "SoftClip",
+        "Cracked",
+        "Jericho",
+        "Warm"
+    };
+
     layout.add(std::make_unique<juce::AudioParameterFloat>(         // Type: float (=range)
         "LoCutFreq", "LoCutFreq",                                   // Parameter names
         juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f),  // Parameter range (20-20k, step-size 1, skew: <1 fills more of the slider with low range
@@ -257,10 +308,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout GnomeDistortAudioProcessor::
     layout.add(std::make_unique<juce::AudioParameterFloat>("HiCutFreq", "HiCutFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 20000.f));
     layout.add(std::make_unique<juce::AudioParameterChoice>("HiCutSlope", "HiCutSlope", slopeOptions, 1));
     // distortion specific parameters
-    layout.add(std::make_unique<juce::AudioParameterFloat>("PreGain", "PreGain", juce::NormalisableRange<float>(-24.f, 48.f, 0.5f, 1.f), 0.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("WaveShapeAmount", "WaveShapeAmount", juce::NormalisableRange<float>(0.f, 100.f, 0.1f, 0.5f), 1.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("PreGain", "PreGain", juce::NormalisableRange<float>(-8.f, 32.f, 0.5f, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Bias", "Bias", juce::NormalisableRange<float>(-1.f, 1.f, 0.01f, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("WaveShapeAmount", "WaveShapeAmount", juce::NormalisableRange<float>(0.f, 0.990f, 0.01f, 0.75f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterChoice>("WaveShapeFunction", "WaveShapeFunction", waveShaperOptions, 0));
     layout.add(std::make_unique<juce::AudioParameterFloat>("ConvolutionAmount", "ConvolutionAmount", juce::NormalisableRange<float>(0.f, 100.f, 0.1f, 0.5f), 1.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("PostGain", "PostGain", juce::NormalisableRange<float>(-24.f, 48.f, 0.5f, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("PostGain", "PostGain", juce::NormalisableRange<float>(-32.f, 8.f, 0.5f, 1.f), 0.f));
 
     return layout;
 }

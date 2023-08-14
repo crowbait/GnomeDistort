@@ -9,7 +9,6 @@
 #pragma once
 
 #include <JuceHeader.h>
-
 enum FilterSlope {
     Slope12,
     Slope24,
@@ -17,9 +16,17 @@ enum FilterSlope {
     Slope48
 };
 
+enum WaveShaperFunction {
+    HardClip,
+    SoftClip,
+    Cracked,
+    Jericho,
+    Warm
+};
+
 struct ChainSettings {
-    float LoCutFreq{ 0 }, PeakFreq{ 0 }, PeakGain{ 0 }, PeakQ{ 0 }, HiCutFreq{ 0 }, PreGain{ 0 }, WaveShapeAmount{ 0 }, ConvolutionAmount{ 0 }, PostGain{ 0 };
-    int LoCutSlope{ FilterSlope::Slope12 }, HiCutSlope{ FilterSlope::Slope12 };
+    float LoCutFreq{ 0 }, PeakFreq{ 0 }, PeakGain{ 0 }, PeakQ{ 0 }, HiCutFreq{ 0 }, PreGain{ 0 }, Bias{ 0 }, WaveShapeAmount{ 0 }, ConvolutionAmount{ 0 }, PostGain{ 0 };
+    int LoCutSlope{ FilterSlope::Slope12 }, HiCutSlope{ FilterSlope::Slope12 }, WaveShapeFunction{ WaveShaperFunction::HardClip };
 };
 
 //==============================================================================
@@ -75,11 +82,12 @@ private:
     using Filter = juce::dsp::IIR::Filter<float>;   // alias for Filters
     using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;     // ProcessorChain which allows to automatically run signal through all specified DSP instances (4 filter slope types)
     using Gain = juce::dsp::Gain<float>;
-    using DistWaveShape = juce::dsp::WaveShaper<float>;
+    using Bias = juce::dsp::Bias<float>;
+    using DistWaveShape = juce::dsp::WaveShaper<float, std::function<float(float)>>;
     using DistConv = juce::dsp::Convolution;
 
     // using MonoChain = juce::dsp::ProcessorChain<MonoPreFilter, Gain, DistWaveShape, DistConv, Gain, MonoPostFilter>;    // complete effect chain for one channel
-    using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter>;
+    using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter, Gain, Bias, DistWaveShape, Gain>;
     MonoChain leftChain, rightChain;    // stereo
 
     enum ChainPositions {
@@ -87,6 +95,9 @@ private:
         Peak,
         HiCut,
         PreGain,
+        DistBias,
+        DistWaveshaper,
+        WaveshaperMakeupGain,
         DistConvolution,
         PostGain,
         PostFilter
@@ -94,6 +105,7 @@ private:
 
     using Coefficients = Filter::CoefficientsPtr;
     static void updateCoefficients(Coefficients& old, const Coefficients& replace);
+    static std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, float& amount);
     static void updateSettings(ChainSettings& chainSettings, double sampleRate, MonoChain& leftChain, MonoChain& rightChain);
     // template function can be used on left AND right channel
     template<typename ChainType, typename CoefficientsType> static void updateCutFilter(ChainType& leftLoCut, const CoefficientsType& cutCoefficients, const FilterSlope& slope) {
