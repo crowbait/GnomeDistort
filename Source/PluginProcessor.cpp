@@ -267,11 +267,20 @@ void GnomeDistortAudioProcessor::getStateInformation(juce::MemoryBlock& destData
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+
+    juce::MemoryOutputStream mos(destData, true);
+    apvts.state.writeToStream(mos);
 }
 
 void GnomeDistortAudioProcessor::setStateInformation(const void* data, int sizeInBytes) {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+
+    auto state = juce::ValueTree::readFromData(data, sizeInBytes);
+    if (state.isValid()) {
+        apvts.replaceState(state);
+        updateSettings(getChainSettings(apvts), getSampleRate(), leftChain, rightChain);
+    }
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout GnomeDistortAudioProcessor::createParameterLayout() {
@@ -302,7 +311,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout GnomeDistortAudioProcessor::
         slopeOptions, 1));                                          // Choices StringArray, default index
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("PeakFreq", "PeakFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 750.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("PeakGain", "PeakGain", juce::NormalisableRange<float>(-24.f, 64.f, 0.25f, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("PeakGain", "PeakGain", juce::NormalisableRange<float>(-24.f, 48.f, 0.25f, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("PeakQ", "PeakQ", juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 1.f), 1.f));
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("HiCutFreq", "HiCutFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 20000.f));
