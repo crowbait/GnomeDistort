@@ -114,20 +114,10 @@ private:
         leftLoCut.template setBypassed<2>(true);
         leftLoCut.template setBypassed<3>(true);
         switch (slope) {
-            case Slope12:
-                *leftLoCut.template get<0>().coefficients = *cutCoefficients[0]; leftLoCut.setBypassed<0>(false); break;
-            case Slope24:
-                *leftLoCut.template get<0>().coefficients = *cutCoefficients[0]; leftLoCut.setBypassed<0>(false);
-                *leftLoCut.template get<1>().coefficients = *cutCoefficients[1]; leftLoCut.setBypassed<0>(false); break;
-            case Slope36:
-                *leftLoCut.template get<0>().coefficients = *cutCoefficients[0]; leftLoCut.setBypassed<0>(false);
-                *leftLoCut.template get<1>().coefficients = *cutCoefficients[1]; leftLoCut.setBypassed<1>(false);
-                *leftLoCut.template get<2>().coefficients = *cutCoefficients[2]; leftLoCut.setBypassed<2>(false); break;
-            case Slope48:
-                *leftLoCut.template  get<0>().coefficients = *cutCoefficients[0]; leftLoCut.setBypassed<0>(false);
-                *leftLoCut.template  get<1>().coefficients = *cutCoefficients[1]; leftLoCut.setBypassed<1>(false);
-                *leftLoCut.template  get<2>().coefficients = *cutCoefficients[2]; leftLoCut.setBypassed<2>(false);
-                *leftLoCut.template  get<3>().coefficients = *cutCoefficients[3]; leftLoCut.setBypassed<3>(false); break;
+            case Slope48: *leftLoCut.template get<3>().coefficients = *cutCoefficients[3]; leftLoCut.setBypassed<3>(false);
+            case Slope36: *leftLoCut.template get<2>().coefficients = *cutCoefficients[2]; leftLoCut.setBypassed<2>(false);
+            case Slope24: *leftLoCut.template get<1>().coefficients = *cutCoefficients[1]; leftLoCut.setBypassed<0>(false);
+            case Slope12: *leftLoCut.template get<0>().coefficients = *cutCoefficients[0]; leftLoCut.setBypassed<0>(false);
         }
     }
 
