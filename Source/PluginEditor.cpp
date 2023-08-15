@@ -15,20 +15,29 @@ void LookAndFeelSliderLabledValues::drawRotarySlider(juce::Graphics& g,
                                                      float rotaryStartAngle, float rotaryEndAngle, juce::Slider&) {
     using namespace juce;
     auto bounds = Rectangle<float>(x, y, width, height);
-    AffineTransform rotator;
-    juce::Image knob = juce::ImageCache::getFromMemory(BinaryData::knob_metal_silver_128_png, BinaryData::knob_metal_silver_128_pngSize);
-    int widthHeight = 128;
-    if (width < 96 || height < 96) {
-        knob = juce::ImageCache::getFromMemory(BinaryData::knob_metal_silver_64_png, BinaryData::knob_metal_silver_64_pngSize);
-        widthHeight = 64;
-    }
-    if (width < 52 || height < 52) {
-        knob = juce::ImageCache::getFromMemory(BinaryData::knob_metal_silver_48_png, BinaryData::knob_metal_silver_48_pngSize);
-        widthHeight = 48;
-    }
+    auto center = bounds.getCentre();
 
-    g.setOrigin((width / 2) - (widthHeight / 2), (height / 2) - (widthHeight / 2));
-    g.drawImageTransformed(knob, rotator.rotated(sliderPosProportional * rotaryEndAngle, widthHeight / 2, widthHeight / 2));
+    // knob body
+    g.setColour(Colour(110u, 10u, 10u));
+    g.fillEllipse(bounds);
+
+    // overlay
+    juce::Image overlay = juce::ImageCache::getFromMemory(BinaryData::knob_overlay_48_png, BinaryData::knob_overlay_48_pngSize);
+    g.drawImage(overlay, bounds, RectanglePlacement::stretchToFit);
+
+    // indicator
+    Path p;
+    Rectangle<float> r;
+    r.setLeft(center.getX() - 2);
+    r.setRight(center.getX() + 2);
+    r.setTop(bounds.getY());
+    r.setBottom(center.getY());
+    p.addRectangle(r);
+    jassert(rotaryStartAngle < rotaryEndAngle);
+    auto sliderAngRad = jmap(sliderPosProportional, 0.f, 1.f, rotaryStartAngle, rotaryEndAngle);
+    p.applyTransform(AffineTransform().rotated(sliderAngRad, center.getX(), center.getY()));
+    g.setColour(Colours::lightgrey);
+    g.fillPath(p);
 }
 
 
@@ -40,8 +49,8 @@ void LookAndFeelSliderLabledValues::drawRotarySlider(juce::Graphics& g,
 void CustomRotarySliderLabeledValues::paint(juce::Graphics& g) {
     using namespace juce;
 
-    auto minAngle = degreesToRadians(0.f);
-    auto maxAngle = degreesToRadians(270.f);
+    auto minAngle = degreesToRadians(-135.f);
+    auto maxAngle = degreesToRadians(135.f);
     auto range = getRange();
     auto sliderBounds = getSliderBounds();
 
@@ -53,7 +62,13 @@ void CustomRotarySliderLabeledValues::paint(juce::Graphics& g) {
     );
 }
 juce::Rectangle<int> CustomRotarySliderLabeledValues::getSliderBounds() const {
-    return getLocalBounds();
+    auto bounds = getLocalBounds();
+    auto size = juce::jmin(bounds.getWidth(), bounds.getHeight()) - (getTextHeight() * 2);
+    juce::Rectangle<int> r;
+    r.setSize(size, size);
+    r.setCentre(bounds.getCentreX(), 0);
+    r.setY(4);
+    return r;
 }
 
 

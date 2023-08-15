@@ -10,18 +10,12 @@
               pluginAAXCategory="8192">
   <MAINGROUP id="zxk1Cm" name="GnomeDistort">
     <GROUP id="{F0736FEA-2D8E-9919-CABB-D0BD47D99A96}" name="Resources">
-      <FILE id="Nh4M7m" name="knob_metal_red_48.png" compile="0" resource="1"
-            file="Assets/Knobs/knob_metal_red_48.png"/>
-      <FILE id="ryEQ2D" name="knob_metal_red_64.png" compile="0" resource="1"
-            file="Assets/Knobs/knob_metal_red_64.png"/>
-      <FILE id="uBTjrG" name="knob_metal_red_128.png" compile="0" resource="1"
-            file="Assets/Knobs/knob_metal_red_128.png"/>
-      <FILE id="gikDio" name="knob_metal_silver_48.png" compile="0" resource="1"
-            file="Assets/Knobs/knob_metal_silver_48.png"/>
-      <FILE id="jYZBXh" name="knob_metal_silver_64.png" compile="0" resource="1"
-            file="Assets/Knobs/knob_metal_silver_64.png"/>
-      <FILE id="ifMmj4" name="knob_metal_silver_128.png" compile="0" resource="1"
-            file="Assets/Knobs/knob_metal_silver_128.png"/>
+      <FILE id="HPJim7" name="knob_overlay_48.png" compile="0" resource="1"
+            file="Assets/knob_overlay_48.png"/>
+      <FILE id="Di5RSg" name="knob_overlay_64.png" compile="0" resource="1"
+            file="Assets/knob_overlay_64.png"/>
+      <FILE id="ESdRia" name="knob_overlay_128.png" compile="0" resource="1"
+            file="Assets/knob_overlay_128.png"/>
       <FILE id="dvdtOQ" name="bg.png" compile="0" resource="1" file="Source/Resources/bg.png"/>
     </GROUP>
     <GROUP id="{90ED5E9F-AA5E-20A2-C944-3AE53E8FFA07}" name="Source">
