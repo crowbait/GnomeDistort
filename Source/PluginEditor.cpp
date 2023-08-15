@@ -11,7 +11,28 @@
 
 //==============================================================================
 GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortAudioProcessor& p)
-    : AudioProcessorEditor(&p), audioProcessor(p) {
+    : AudioProcessorEditor(&p), audioProcessor(p),
+    LoCutFreqSliderAttachment(audioProcessor.apvts, "LoCutFreq", LoCutFreqSlider),
+    PeakFreqSliderAttachment(audioProcessor.apvts, "PeakFreq", PeakFreqSlider),
+    PeakGainSliderAttachment(audioProcessor.apvts, "PeakGain", PeakGainSlider),
+    PeakQSliderAttachment(audioProcessor.apvts, "PeakQ", PeakQSlider),
+    HiCutFreqSliderAttachment(audioProcessor.apvts, "HiCutFreq", HiCutFreqSlider),
+    PreGainSliderAttachment(audioProcessor.apvts, "PreGain", PreGainSlider),
+    BiasSliderAttachment(audioProcessor.apvts, "Bias", BiasSlider),
+    WaveShapeAmountSliderAttachment(audioProcessor.apvts, "WaveShapeAmount", WaveShapeAmountSlider),
+    PostGainSliderAttachment(audioProcessor.apvts, "PostGain", PostGainSlider),
+    LoCutSlopeSelectAttachment(audioProcessor.apvts, "LoCutSlope", LoCutSlopeSelect),
+    HiCutSlopeSelectAttachment(audioProcessor.apvts, "HiCutSlope", HiCutSlopeSelect),
+    WaveshapeSelectAttachment(audioProcessor.apvts, "WaveShapeFunction", WaveshapeSelect) {
+
+    juce::StringArray slopeOptions = GnomeDistortAudioProcessor::getSlopeOptions();
+    LoCutSlopeSelect.addItemList(slopeOptions, 1);
+    LoCutSlopeSelect.setSelectedId(1);
+    HiCutSlopeSelect.addItemList(slopeOptions, 1);
+    HiCutSlopeSelect.setSelectedId(1);
+    WaveshapeSelect.addItemList(GnomeDistortAudioProcessor::getWaveshaperOptions(), 1);
+    WaveshapeSelect.setSelectedId(1);
+
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 

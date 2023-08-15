@@ -84,6 +84,16 @@ void GnomeDistortAudioProcessor::changeProgramName(int index, const juce::String
 void GnomeDistortAudioProcessor::updateCoefficients(Coefficients& old, const Coefficients& replace) {
     *old = *replace;
 }
+juce::StringArray GnomeDistortAudioProcessor::getSlopeOptions() {
+    juce::StringArray result;
+    for (int i = 0; i < 4; i++) {
+        juce::String str;
+        str << (12 + i * 12);           // generates options 12, 24 ...
+        str << (" dB");
+        result.add(str);
+    }
+    return result;
+}
 juce::StringArray GnomeDistortAudioProcessor::getWaveshaperOptions() {
     return {
         "HardClip",
@@ -302,20 +312,14 @@ void GnomeDistortAudioProcessor::setStateInformation(const void* data, int sizeI
 juce::AudioProcessorValueTreeState::ParameterLayout GnomeDistortAudioProcessor::createParameterLayout() {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
-    juce::StringArray slopeOptions;     // generate options for filter steepness
-    for (int i = 0; i < 4; i++) {
-        juce::String str;
-        str << (12 + i * 12);           // generates options 12, 24 ...
-        str << (" dB");
-        slopeOptions.add(str);
-    }
+    juce::StringArray& slopeOptions = getSlopeOptions();
 
     layout.add(std::make_unique<juce::AudioParameterFloat>(         // Type: float (=range)
         "LoCutFreq", "LoCutFreq",                                   // Parameter names
         juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f),  // Parameter range (20-20k, step-size 1, skew: <1 fills more of the slider with low range
         20.f));                                                     // default value
     layout.add(std::make_unique<juce::AudioParameterChoice>(        // Type: choice
-        "LoCutSlope", "HiCutSlope",                                 // Parameter names
+        "LoCutSlope", "LoCutSlope",                                 // Parameter names
         slopeOptions, 1));                                          // Choices StringArray, default index
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("PeakFreq", "PeakFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 750.f));
