@@ -132,8 +132,7 @@ std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, floa
 
 void updateSettings(ChainSettings& chainSettings, double sampleRate, MonoChain& leftChain, MonoChain& rightChain) {
     // link LoCut filter coefficients
-    auto LoCutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(     // create array of filter coefficients for 4 possible slopes
-        chainSettings.LoCutFreq, sampleRate, (chainSettings.LoCutSlope + 1) * 2);
+    auto LoCutCoefficients = generateLoCutFilter(chainSettings, sampleRate);
     auto& leftLoCut = leftChain.get<ChainPositions::LoCut>();
     auto& rightLoCut = rightChain.get<ChainPositions::LoCut>();
     updateCutFilter(leftLoCut, LoCutCoefficients, static_cast<FilterSlope>(chainSettings.LoCutSlope));
@@ -145,8 +144,7 @@ void updateSettings(ChainSettings& chainSettings, double sampleRate, MonoChain& 
     updateCoefficients(rightChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
 
     // link HiCut filter coefficients
-    auto HiCutCoefficients = juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(     // create array of filter coefficients for 4 possible slopes
-        chainSettings.HiCutFreq, sampleRate, (chainSettings.HiCutSlope + 1) * 2);
+    auto HiCutCoefficients = generateHiCutFilter(chainSettings, sampleRate);
     auto& leftHiCut = leftChain.get<ChainPositions::HiCut>();
     auto& rightHiCut = rightChain.get<ChainPositions::HiCut>();
     updateCutFilter(leftHiCut, HiCutCoefficients, static_cast<FilterSlope>(chainSettings.HiCutSlope));

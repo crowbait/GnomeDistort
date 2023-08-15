@@ -50,21 +50,30 @@ enum ChainPositions {
 using Coefficients = Filter::CoefficientsPtr;
 void updateCoefficients(Coefficients& old, const Coefficients& replace);
 Coefficients generatePeakFilter(const ChainSettings& chainSettings, double sampleRate);
+inline auto generateLoCutFilter(const ChainSettings& chainSettings, double sampleRate) {
+    return juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(     // create array of filter coefficients for 4 possible slopes
+        chainSettings.LoCutFreq, sampleRate, (chainSettings.LoCutSlope + 1) * 2);
+}
+inline auto generateHiCutFilter(const ChainSettings& chainSettings, double sampleRate) {
+    return juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(     // create array of filter coefficients for 4 possible slopes
+        chainSettings.HiCutFreq, sampleRate, (chainSettings.HiCutSlope + 1) * 2);
+}
 // template function can be used on left AND right channel
-template<typename ChainType, typename CoefficientsType> static void updateCutFilter(ChainType& leftLoCut, const CoefficientsType& cutCoefficients, const FilterSlope& slope) {
-    leftLoCut.template setBypassed<0>(true);     // bypass all 4 possible filters (one for every possible slope)
-    leftLoCut.template setBypassed<1>(true);
-    leftLoCut.template setBypassed<2>(true);
-    leftLoCut.template setBypassed<3>(true);
+template<typename ChainType, typename CoefficientsType> static void updateCutFilter(ChainType& filter, const CoefficientsType& cutCoefficients, const FilterSlope& slope) {
+    filter.template setBypassed<0>(true);     // bypass all 4 possible filters (one for every possible slope)
+    filter.template setBypassed<1>(true);
+    filter.template setBypassed<2>(true);
+    filter.template setBypassed<3>(true);
     switch (slope) {
-        case Slope48: *leftLoCut.template get<3>().coefficients = *cutCoefficients[3]; leftLoCut.setBypassed<3>(false);
-        case Slope36: *leftLoCut.template get<2>().coefficients = *cutCoefficients[2]; leftLoCut.setBypassed<2>(false);
-        case Slope24: *leftLoCut.template get<1>().coefficients = *cutCoefficients[1]; leftLoCut.setBypassed<0>(false);
-        case Slope12: *leftLoCut.template get<0>().coefficients = *cutCoefficients[0]; leftLoCut.setBypassed<0>(false);
+        case Slope48: *filter.template get<3>().coefficients = *cutCoefficients[3]; filter.setBypassed<3>(false);
+        case Slope36: *filter.template get<2>().coefficients = *cutCoefficients[2]; filter.setBypassed<2>(false);
+        case Slope24: *filter.template get<1>().coefficients = *cutCoefficients[1]; filter.setBypassed<0>(false);
+        case Slope12: *filter.template get<0>().coefficients = *cutCoefficients[0]; filter.setBypassed<0>(false);
     }
 }
 
 std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, float& amount);
+ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
 void updateSettings(ChainSettings& chainSettings, double sampleRate, MonoChain& leftChain, MonoChain& rightChain);
 
 //==============================================================================

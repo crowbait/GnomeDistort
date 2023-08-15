@@ -40,6 +40,13 @@ GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortA
         addAndMakeVisible(comp);
     }
 
+    const auto& params = audioProcessor.getParameters();
+    for (auto param : params) {
+        param->addListener(this);
+    }
+
+    startTimerHz(60);   // timer for repaint
+
     setSize(400, 600);
 }
 
@@ -50,8 +57,8 @@ void GnomeDistortAudioProcessorEditor::paint(juce::Graphics& g) {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
 
-    Image background = ImageCache::getFromMemory(BinaryData::bg_png, BinaryData::bg_pngSize);
-    g.drawImageAt(background, 0, 0);
+    //Image background = ImageCache::getFromMemory(BinaryData::bg_png, BinaryData::bg_pngSize);
+    //g.drawImageAt(background, 0, 0);
 
     // spectrum
     auto bounds = getLocalBounds();
@@ -70,26 +77,28 @@ void GnomeDistortAudioProcessorEditor::paint(juce::Graphics& g) {
     auto& loCut = monoChain.get<ChainPositions::LoCut>();
     auto& peak = monoChain.get<ChainPositions::Peak>();
     auto& hiCut = monoChain.get<ChainPositions::HiCut>();
-    auto& waveshaper = monoChain.get<ChainPositions::WaveshaperMakeupGain>();
+    auto& postWaveshaper = monoChain.get<ChainPositions::WaveshaperMakeupGain>();
 
     auto sampleRate = audioProcessor.getSampleRate();
+
+    DBG("Drawing");
 
     // get filter magnitudes
     std::vector<double> magnitudes;
     magnitudes.resize(width);
     for (int i = 0; i < width; i++) {   // compute magnitude per pixel
         double mag = 1.f;   // init gain magnitude
-        double freq = juce::mapToLog10((double)i / (double)width, 20.0, 20.0);
+        double freq = juce::mapToLog10((double)i / (double)width, 20.0, 20000.0);
 
-        if (loCut.isBypassed<0>()) mag *= loCut.get<0>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        if (loCut.isBypassed<1>()) mag *= loCut.get<1>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        if (loCut.isBypassed<2>()) mag *= loCut.get<2>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        if (loCut.isBypassed<3>()) mag *= loCut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!loCut.isBypassed<0>()) mag *= loCut.get<0>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!loCut.isBypassed<1>()) mag *= loCut.get<1>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!loCut.isBypassed<2>()) mag *= loCut.get<2>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!loCut.isBypassed<3>()) mag *= loCut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
         mag *= peak.coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        if (hiCut.isBypassed<0>()) mag *= hiCut.get<0>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        if (hiCut.isBypassed<1>()) mag *= hiCut.get<1>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        if (hiCut.isBypassed<2>()) mag *= hiCut.get<2>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        if (hiCut.isBypassed<3>()) mag *= hiCut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!hiCut.isBypassed<0>()) mag *= hiCut.get<0>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!hiCut.isBypassed<1>()) mag *= hiCut.get<1>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!hiCut.isBypassed<2>()) mag *= hiCut.get<2>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!hiCut.isBypassed<3>()) mag *= hiCut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
 
         magnitudes[i] = Decibels::gainToDecibels(mag);
     }
@@ -99,11 +108,16 @@ void GnomeDistortAudioProcessorEditor::paint(juce::Graphics& g) {
     for (int i = 1; i < magnitudes.size(); i++) {   // set path for every pixel
         filterResponseCurve.lineTo(displayArea.getX() + i, map(magnitudes[i]));
     }
-    g.setColour(Colours::grey);
+    g.setColour(Colours::lightgoldenrodyellow);
     g.strokePath(filterResponseCurve, PathStrokeType(2));   // draw path
 }
 
-GnomeDistortAudioProcessorEditor::~GnomeDistortAudioProcessorEditor() {}
+GnomeDistortAudioProcessorEditor::~GnomeDistortAudioProcessorEditor() {
+    const auto& params = audioProcessor.getParameters();
+    for (auto param : params) {
+        param->removeListener(this);
+    }
+}
 
 void GnomeDistortAudioProcessorEditor::resized() {
     // This is generally where you'll want to lay out the positions of any
@@ -129,10 +143,11 @@ void GnomeDistortAudioProcessorEditor::resized() {
     HiCutFreqSlider.setBounds(rightFilterArea);
     filterArea.removeFromLeft(padding);
     filterArea.removeFromRight(padding);
-    PeakFreqSlider.setBounds(filterArea.removeFromTop(filterArea.getHeight() * 0.5));
-    PeakQSlider.setBounds(filterArea.removeFromLeft(filterArea.getWidth() * 0.5));
-    PeakGainSlider.setBounds(filterArea);
+    PeakGainSlider.setBounds(filterArea.removeFromTop(filterArea.getHeight() * 0.5));
+    PeakFreqSlider.setBounds(filterArea.removeFromLeft(filterArea.getWidth() * 0.5));
+    PeakQSlider.setBounds(filterArea);
 
+    bounds.removeFromTop(padding * 2);
     auto preDistArea = bounds.removeFromLeft(bounds.getWidth() * 0.25);
     auto postDistArea = bounds.removeFromRight(bounds.getWidth() * 0.33);
     PreGainSlider.setBounds(preDistArea);
@@ -150,7 +165,16 @@ void GnomeDistortAudioProcessorEditor::parameterValueChanged(int parameterIndex,
 
 void GnomeDistortAudioProcessorEditor::timerCallback() {
     if (parametersChanged.compareAndSetBool(false, true)) {
+        // update monochain
+        ChainSettings chainSettings = getChainSettings(audioProcessor.apvts);
+        auto loCoefficients = generateLoCutFilter(chainSettings, audioProcessor.getSampleRate());
+        updateCutFilter(monoChain.get<ChainPositions::LoCut>(), loCoefficients, static_cast<FilterSlope>(chainSettings.LoCutSlope));
+        Coefficients peakCoefficients = generatePeakFilter(chainSettings, audioProcessor.getSampleRate());
+        updateCoefficients(monoChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
+        auto hiCoefficients = generateHiCutFilter(chainSettings, audioProcessor.getSampleRate());
+        updateCutFilter(monoChain.get<ChainPositions::HiCut>(), hiCoefficients, static_cast<FilterSlope>(chainSettings.HiCutSlope));
 
+        repaint();
     }
 }
 
