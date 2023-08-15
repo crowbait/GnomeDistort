@@ -14,20 +14,25 @@
 //==============================================================================
 /**
 */
-class GnomeDistortAudioProcessorEditor  : public juce::AudioProcessorEditor
-{
+class GnomeDistortAudioProcessorEditor : public juce::AudioProcessorEditor, juce::AudioProcessorParameter::Listener, juce::Timer {
 public:
-    GnomeDistortAudioProcessorEditor (GnomeDistortAudioProcessor&);
+    GnomeDistortAudioProcessorEditor(GnomeDistortAudioProcessor&);
     ~GnomeDistortAudioProcessorEditor() override;
 
     //==============================================================================
-    void paint (juce::Graphics&) override;
+    void paint(juce::Graphics&) override;
     void resized() override;
+
+    void parameterValueChanged(int parameterIndex, float newValue) override;
+    void parameterGestureChanged(int parameterIndex, bool gestureIsStarting) override {}; // not implemented
+    void timerCallback() override;
 
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     GnomeDistortAudioProcessor& audioProcessor;
+
+    juce::Atomic<bool> parametersChanged{ false };
 
     struct CustomRotarySlider : juce::Slider {
         CustomRotarySlider() : juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag, juce::Slider::TextEntryBoxPosition::NoTextBox) {
@@ -48,10 +53,12 @@ private:
     using SliderAttachment = APVTS::SliderAttachment;
     using SelectAttachment = APVTS::ComboBoxAttachment;
     SliderAttachment LoCutFreqSliderAttachment, PeakFreqSliderAttachment, PeakGainSliderAttachment, PeakQSliderAttachment,
-                     HiCutFreqSliderAttachment, PreGainSliderAttachment, BiasSliderAttachment, WaveShapeAmountSliderAttachment, PostGainSliderAttachment;
+        HiCutFreqSliderAttachment, PreGainSliderAttachment, BiasSliderAttachment, WaveShapeAmountSliderAttachment, PostGainSliderAttachment;
     SelectAttachment LoCutSlopeSelectAttachment, HiCutSlopeSelectAttachment, WaveshapeSelectAttachment;
 
     std::vector<juce::Component*> getComponents();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GnomeDistortAudioProcessorEditor)
+    MonoChain monoChain;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GnomeDistortAudioProcessorEditor)
 };

@@ -80,8 +80,12 @@ void GnomeDistortAudioProcessor::changeProgramName(int index, const juce::String
 //==============================================================================
 
 // HELPERS
-
-void GnomeDistortAudioProcessor::updateCoefficients(Coefficients& old, const Coefficients& replace) {
+Coefficients generatePeakFilter(const ChainSettings& chainSettings, double sampleRate) {
+    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(
+        sampleRate, chainSettings.PeakFreq, chainSettings.PeakQ,
+        juce::Decibels::decibelsToGain(chainSettings.PeakGain)); // convert decibels to gain value
+}
+void updateCoefficients(Coefficients& old, const Coefficients& replace) {
     *old = *replace;
 }
 juce::StringArray GnomeDistortAudioProcessor::getSlopeOptions() {
@@ -103,7 +107,7 @@ juce::StringArray GnomeDistortAudioProcessor::getWaveshaperOptions() {
         "Warm"
     };
 }
-std::function<float(float)> GnomeDistortAudioProcessor::getWaveshaperFunction(WaveShaperFunction& func, float& amount) {
+std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, float& amount) {
     switch (func) {
         case HardClip:
             return [amount](float x) { return juce::jlimit(0.f - (1.f - amount), 1.f - amount, x); };
@@ -126,7 +130,7 @@ std::function<float(float)> GnomeDistortAudioProcessor::getWaveshaperFunction(Wa
 }
 
 
-void GnomeDistortAudioProcessor::updateSettings(ChainSettings& chainSettings, double sampleRate, MonoChain& leftChain, MonoChain& rightChain) {
+void updateSettings(ChainSettings& chainSettings, double sampleRate, MonoChain& leftChain, MonoChain& rightChain) {
     // link LoCut filter coefficients
     auto LoCutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(     // create array of filter coefficients for 4 possible slopes
         chainSettings.LoCutFreq, sampleRate, (chainSettings.LoCutSlope + 1) * 2);
@@ -136,9 +140,7 @@ void GnomeDistortAudioProcessor::updateSettings(ChainSettings& chainSettings, do
     updateCutFilter(rightLoCut, LoCutCoefficients, static_cast<FilterSlope>(chainSettings.LoCutSlope));
 
     // link peak filter coefficient
-    auto peakCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(
-        sampleRate, chainSettings.PeakFreq, chainSettings.PeakQ,
-        juce::Decibels::decibelsToGain(chainSettings.PeakGain)); // convert decibels to gain value
+    auto peakCoefficients = generatePeakFilter(chainSettings, sampleRate);
     updateCoefficients(leftChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
     updateCoefficients(rightChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
 
@@ -322,8 +324,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout GnomeDistortAudioProcessor::
         "LoCutSlope", "LoCutSlope",                                 // Parameter names
         slopeOptions, 1));                                          // Choices StringArray, default index
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>("PeakFreq", "PeakFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 750.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("PeakGain", "PeakGain", juce::NormalisableRange<float>(-24.f, 48.f, 0.25f, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("PeakFreq", "PeakFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 1200.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("PeakGain", "PeakGain", juce::NormalisableRange<float>(-36.f, 36.f, 0.25f, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("PeakQ", "PeakQ", juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 1.f), 1.f));
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("HiCutFreq", "HiCutFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 20000.f));

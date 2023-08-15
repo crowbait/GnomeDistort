@@ -29,6 +29,44 @@ struct ChainSettings {
     int LoCutSlope{ FilterSlope::Slope12 }, HiCutSlope{ FilterSlope::Slope12 }, WaveShapeFunction{ WaveShaperFunction::HardClip };
 };
 
+using Filter = juce::dsp::IIR::Filter<float>;   // alias for Filters
+using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;     // ProcessorChain which allows to automatically run signal through all specified DSP instances (4 filter slope types)
+using Gain = juce::dsp::Gain<float>;
+using Bias = juce::dsp::Bias<float>;
+using DistWaveShape = juce::dsp::WaveShaper<float, std::function<float(float)>>;
+
+using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter, Gain, Bias, DistWaveShape, Gain, Gain>; // complete effect chain for one channel
+enum ChainPositions {
+    LoCut,
+    Peak,
+    HiCut,
+    PreGain,
+    DistBias,
+    DistWaveshaper,
+    WaveshaperMakeupGain,
+    PostGain
+};
+
+using Coefficients = Filter::CoefficientsPtr;
+void updateCoefficients(Coefficients& old, const Coefficients& replace);
+Coefficients generatePeakFilter(const ChainSettings& chainSettings, double sampleRate);
+// template function can be used on left AND right channel
+template<typename ChainType, typename CoefficientsType> static void updateCutFilter(ChainType& leftLoCut, const CoefficientsType& cutCoefficients, const FilterSlope& slope) {
+    leftLoCut.template setBypassed<0>(true);     // bypass all 4 possible filters (one for every possible slope)
+    leftLoCut.template setBypassed<1>(true);
+    leftLoCut.template setBypassed<2>(true);
+    leftLoCut.template setBypassed<3>(true);
+    switch (slope) {
+        case Slope48: *leftLoCut.template get<3>().coefficients = *cutCoefficients[3]; leftLoCut.setBypassed<3>(false);
+        case Slope36: *leftLoCut.template get<2>().coefficients = *cutCoefficients[2]; leftLoCut.setBypassed<2>(false);
+        case Slope24: *leftLoCut.template get<1>().coefficients = *cutCoefficients[1]; leftLoCut.setBypassed<0>(false);
+        case Slope12: *leftLoCut.template get<0>().coefficients = *cutCoefficients[0]; leftLoCut.setBypassed<0>(false);
+    }
+}
+
+std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, float& amount);
+void updateSettings(ChainSettings& chainSettings, double sampleRate, MonoChain& leftChain, MonoChain& rightChain);
+
 //==============================================================================
 /**
 */
@@ -81,44 +119,8 @@ public:
     static juce::StringArray getWaveshaperOptions();
 
 private:
-    using Filter = juce::dsp::IIR::Filter<float>;   // alias for Filters
-    using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;     // ProcessorChain which allows to automatically run signal through all specified DSP instances (4 filter slope types)
-    using Gain = juce::dsp::Gain<float>;
-    using Bias = juce::dsp::Bias<float>;
-    using DistWaveShape = juce::dsp::WaveShaper<float, std::function<float(float)>>;
-
-    // using MonoChain = juce::dsp::ProcessorChain<MonoPreFilter, Gain, DistWaveShape, DistConv, Gain, MonoPostFilter>;    // complete effect chain for one channel
-    using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter, Gain, Bias, DistWaveShape, Gain, Gain>;
     MonoChain leftChain, rightChain;    // stereo
 
-    enum ChainPositions {
-        LoCut,
-        Peak,
-        HiCut,
-        PreGain,
-        DistBias,
-        DistWaveshaper,
-        WaveshaperMakeupGain,
-        PostGain
-    };
-
-    using Coefficients = Filter::CoefficientsPtr;
-    static void updateCoefficients(Coefficients& old, const Coefficients& replace);
-    static std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, float& amount);
-    static void updateSettings(ChainSettings& chainSettings, double sampleRate, MonoChain& leftChain, MonoChain& rightChain);
-    // template function can be used on left AND right channel
-    template<typename ChainType, typename CoefficientsType> static void updateCutFilter(ChainType& leftLoCut, const CoefficientsType& cutCoefficients, const FilterSlope& slope) {
-        leftLoCut.template setBypassed<0>(true);     // bypass all 4 possible filters (one for every possible slope)
-        leftLoCut.template setBypassed<1>(true);
-        leftLoCut.template setBypassed<2>(true);
-        leftLoCut.template setBypassed<3>(true);
-        switch (slope) {
-            case Slope48: *leftLoCut.template get<3>().coefficients = *cutCoefficients[3]; leftLoCut.setBypassed<3>(false);
-            case Slope36: *leftLoCut.template get<2>().coefficients = *cutCoefficients[2]; leftLoCut.setBypassed<2>(false);
-            case Slope24: *leftLoCut.template get<1>().coefficients = *cutCoefficients[1]; leftLoCut.setBypassed<0>(false);
-            case Slope12: *leftLoCut.template get<0>().coefficients = *cutCoefficients[0]; leftLoCut.setBypassed<0>(false);
-        }
-    }
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GnomeDistortAudioProcessor)
