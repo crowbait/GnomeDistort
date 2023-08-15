@@ -77,6 +77,7 @@ public:
 
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     juce::AudioProcessorValueTreeState apvts{ *this, nullptr, "Parameters", createParameterLayout() };
+    static juce::StringArray getWaveshaperOptions();
 
 private:
     using Filter = juce::dsp::IIR::Filter<float>;   // alias for Filters

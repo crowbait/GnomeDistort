@@ -9,6 +9,9 @@
               pluginCode="GDst" aaxIdentifier="de.crowbait.gnomedistort" pluginVST3Category="Distortion"
               pluginAAXCategory="8192">
   <MAINGROUP id="zxk1Cm" name="GnomeDistort">
+    <GROUP id="{F0736FEA-2D8E-9919-CABB-D0BD47D99A96}" name="Resources">
+      <FILE id="dvdtOQ" name="bg.png" compile="0" resource="1" file="Source/Resources/bg.png"/>
+    </GROUP>
     <GROUP id="{90ED5E9F-AA5E-20A2-C944-3AE53E8FFA07}" name="Source">
       <FILE id="NCHjNI" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
