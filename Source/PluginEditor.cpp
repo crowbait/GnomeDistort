@@ -9,64 +9,26 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-//==============================================================================
-GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortAudioProcessor& p)
-    : AudioProcessorEditor(&p), audioProcessor(p),
-    LoCutFreqSliderAttachment(audioProcessor.apvts, "LoCutFreq", LoCutFreqSlider),
-    PeakFreqSliderAttachment(audioProcessor.apvts, "PeakFreq", PeakFreqSlider),
-    PeakGainSliderAttachment(audioProcessor.apvts, "PeakGain", PeakGainSlider),
-    PeakQSliderAttachment(audioProcessor.apvts, "PeakQ", PeakQSlider),
-    HiCutFreqSliderAttachment(audioProcessor.apvts, "HiCutFreq", HiCutFreqSlider),
-    PreGainSliderAttachment(audioProcessor.apvts, "PreGain", PreGainSlider),
-    BiasSliderAttachment(audioProcessor.apvts, "Bias", BiasSlider),
-    WaveShapeAmountSliderAttachment(audioProcessor.apvts, "WaveShapeAmount", WaveShapeAmountSlider),
-    PostGainSliderAttachment(audioProcessor.apvts, "PostGain", PostGainSlider),
-    LoCutSlopeSelectAttachment(audioProcessor.apvts, "LoCutSlope", LoCutSlopeSelect),
-    HiCutSlopeSelectAttachment(audioProcessor.apvts, "HiCutSlope", HiCutSlopeSelect),
-    WaveshapeSelectAttachment(audioProcessor.apvts, "WaveShapeFunction", WaveshapeSelect) {
-
-    juce::StringArray slopeOptions = GnomeDistortAudioProcessor::getSlopeOptions();
-    LoCutSlopeSelect.addItemList(slopeOptions, 1);
-    LoCutSlopeSelect.setSelectedId(1);
-    HiCutSlopeSelect.addItemList(slopeOptions, 1);
-    HiCutSlopeSelect.setSelectedId(1);
-    WaveshapeSelect.addItemList(GnomeDistortAudioProcessor::getWaveshaperOptions(), 1);
-    WaveshapeSelect.setSelectedId(1);
-
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
-
-    for (auto* comp : getComponents()) {
-        addAndMakeVisible(comp);
-    }
-
-    const auto& params = audioProcessor.getParameters();
+DisplayComponent::DisplayComponent(GnomeDistortAudioProcessor& p) : audioProcessor(p) {
+    const auto& params = audioProcessor.getParameters();    // register as listener to reflect parameter changes in UI
     for (auto param : params) {
         param->addListener(this);
     }
-
     startTimerHz(60);   // timer for repaint
-
-    setSize(400, 600);
+}
+DisplayComponent::~DisplayComponent() {
+    const auto& params = audioProcessor.getParameters();
+    for (auto param : params) {
+        param->removeListener(this);
+    }
 }
 
-//==============================================================================
-void GnomeDistortAudioProcessorEditor::paint(juce::Graphics& g) {
+void DisplayComponent::paint(juce::Graphics& g) {
     using namespace juce;
 
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
-
-    //Image background = ImageCache::getFromMemory(BinaryData::bg_png, BinaryData::bg_pngSize);
-    //g.drawImageAt(background, 0, 0);
-
     // spectrum
-    auto bounds = getLocalBounds();
-    auto displayArea = bounds.removeFromTop(bounds.getHeight() * 0.25);    // 25%
-    displayArea.removeFromLeft(36);
-    displayArea.removeFromRight(36);
-    displayArea.removeFromTop(24);
-    displayArea.removeFromBottom(24);
+    auto displayArea = getLocalBounds();
+
     const int width = displayArea.getWidth();
     const double outputMin = displayArea.getBottom();
     const double outputMax = displayArea.getY();
@@ -80,8 +42,6 @@ void GnomeDistortAudioProcessorEditor::paint(juce::Graphics& g) {
     auto& postWaveshaper = monoChain.get<ChainPositions::WaveshaperMakeupGain>();
 
     auto sampleRate = audioProcessor.getSampleRate();
-
-    DBG("Drawing");
 
     // get filter magnitudes
     std::vector<double> magnitudes;
@@ -112,12 +72,74 @@ void GnomeDistortAudioProcessorEditor::paint(juce::Graphics& g) {
     g.strokePath(filterResponseCurve, PathStrokeType(2));   // draw path
 }
 
-GnomeDistortAudioProcessorEditor::~GnomeDistortAudioProcessorEditor() {
-    const auto& params = audioProcessor.getParameters();
-    for (auto param : params) {
-        param->removeListener(this);
+void DisplayComponent::parameterValueChanged(int parameterIndex, float newValue) {
+    parametersChanged.set(true);
+}
+
+void DisplayComponent::timerCallback() {
+    if (parametersChanged.compareAndSetBool(false, true)) {
+        // update monochain
+        ChainSettings chainSettings = getChainSettings(audioProcessor.apvts);
+        auto loCoefficients = generateLoCutFilter(chainSettings, audioProcessor.getSampleRate());
+        updateCutFilter(monoChain.get<ChainPositions::LoCut>(), loCoefficients, static_cast<FilterSlope>(chainSettings.LoCutSlope));
+        Coefficients peakCoefficients = generatePeakFilter(chainSettings, audioProcessor.getSampleRate());
+        updateCoefficients(monoChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
+        auto hiCoefficients = generateHiCutFilter(chainSettings, audioProcessor.getSampleRate());
+        updateCutFilter(monoChain.get<ChainPositions::HiCut>(), hiCoefficients, static_cast<FilterSlope>(chainSettings.HiCutSlope));
+
+        repaint();
     }
 }
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+
+GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortAudioProcessor& p)
+    : AudioProcessorEditor(&p), audioProcessor(p),
+    displayComp(audioProcessor),
+    LoCutFreqSliderAttachment(audioProcessor.apvts, "LoCutFreq", LoCutFreqSlider),
+    PeakFreqSliderAttachment(audioProcessor.apvts, "PeakFreq", PeakFreqSlider),
+    PeakGainSliderAttachment(audioProcessor.apvts, "PeakGain", PeakGainSlider),
+    PeakQSliderAttachment(audioProcessor.apvts, "PeakQ", PeakQSlider),
+    HiCutFreqSliderAttachment(audioProcessor.apvts, "HiCutFreq", HiCutFreqSlider),
+    PreGainSliderAttachment(audioProcessor.apvts, "PreGain", PreGainSlider),
+    BiasSliderAttachment(audioProcessor.apvts, "Bias", BiasSlider),
+    WaveShapeAmountSliderAttachment(audioProcessor.apvts, "WaveShapeAmount", WaveShapeAmountSlider),
+    PostGainSliderAttachment(audioProcessor.apvts, "PostGain", PostGainSlider),
+    LoCutSlopeSelectAttachment(audioProcessor.apvts, "LoCutSlope", LoCutSlopeSelect),
+    HiCutSlopeSelectAttachment(audioProcessor.apvts, "HiCutSlope", HiCutSlopeSelect),
+    WaveshapeSelectAttachment(audioProcessor.apvts, "WaveShapeFunction", WaveshapeSelect) {
+
+    juce::StringArray slopeOptions = GnomeDistortAudioProcessor::getSlopeOptions();
+    LoCutSlopeSelect.addItemList(slopeOptions, 1);
+    LoCutSlopeSelect.setSelectedId(1);
+    HiCutSlopeSelect.addItemList(slopeOptions, 1);
+    HiCutSlopeSelect.setSelectedId(1);
+    WaveshapeSelect.addItemList(GnomeDistortAudioProcessor::getWaveshaperOptions(), 1);
+    WaveshapeSelect.setSelectedId(1);
+
+    // Make sure that before the constructor has finished, you've set the
+    // editor's size to whatever you need it to be.
+
+    for (auto* comp : getComponents()) {
+        addAndMakeVisible(comp);
+    }
+
+    setSize(400, 600);
+}
+
+//==============================================================================
+void GnomeDistortAudioProcessorEditor::paint(juce::Graphics& g) {
+    // (Our component is opaque, so we must completely fill the background with a solid colour)
+    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+
+    //juce::Image background = ImageCache::getFromMemory(BinaryData::bg_png, BinaryData::bg_pngSize);
+    //g.drawImageAt(background, 0, 0);
+}
+
+GnomeDistortAudioProcessorEditor::~GnomeDistortAudioProcessorEditor() {}
 
 void GnomeDistortAudioProcessorEditor::resized() {
     // This is generally where you'll want to lay out the positions of any
@@ -132,11 +154,16 @@ void GnomeDistortAudioProcessorEditor::resized() {
     bounds.removeFromRight(padding * 2);
     bounds.removeFromBottom(padding * 2);
 
-    auto displayArea = bounds.removeFromTop(bounds.getHeight() * 0.25);    // 25%
+    auto displayArea = bounds.removeFromTop(bounds.getHeight() * 0.25);
+    displayArea.removeFromLeft(padding);
+    displayArea.removeFromRight(padding);
+    displayArea.removeFromTop(padding);
+    displayArea.removeFromBottom(padding * 2);
+    displayComp.setBounds(displayArea);    // 25%
 
     auto filterArea = bounds.removeFromTop(bounds.getHeight() * 0.33);      // 75*0.33=25%
-    auto leftFilterArea = filterArea.removeFromLeft(filterArea.getWidth() * 0.33);
-    auto rightFilterArea = filterArea.removeFromRight(filterArea.getWidth() * 0.5);
+    auto leftFilterArea = filterArea.removeFromLeft(filterArea.getWidth() * 0.25);
+    auto rightFilterArea = filterArea.removeFromRight(filterArea.getWidth() * 0.33);
     LoCutSlopeSelect.setBounds(leftFilterArea.removeFromBottom(selectHeight));
     LoCutFreqSlider.setBounds(leftFilterArea);
     HiCutSlopeSelect.setBounds(rightFilterArea.removeFromBottom(selectHeight));
@@ -159,25 +186,6 @@ void GnomeDistortAudioProcessorEditor::resized() {
     WaveShapeAmountSlider.setBounds(bounds);
 }
 
-void GnomeDistortAudioProcessorEditor::parameterValueChanged(int parameterIndex, float newValue) {
-    parametersChanged.set(true);
-}
-
-void GnomeDistortAudioProcessorEditor::timerCallback() {
-    if (parametersChanged.compareAndSetBool(false, true)) {
-        // update monochain
-        ChainSettings chainSettings = getChainSettings(audioProcessor.apvts);
-        auto loCoefficients = generateLoCutFilter(chainSettings, audioProcessor.getSampleRate());
-        updateCutFilter(monoChain.get<ChainPositions::LoCut>(), loCoefficients, static_cast<FilterSlope>(chainSettings.LoCutSlope));
-        Coefficients peakCoefficients = generatePeakFilter(chainSettings, audioProcessor.getSampleRate());
-        updateCoefficients(monoChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
-        auto hiCoefficients = generateHiCutFilter(chainSettings, audioProcessor.getSampleRate());
-        updateCutFilter(monoChain.get<ChainPositions::HiCut>(), hiCoefficients, static_cast<FilterSlope>(chainSettings.HiCutSlope));
-
-        repaint();
-    }
-}
-
 std::vector<juce::Component*> GnomeDistortAudioProcessorEditor::getComponents() {
     return {
         &LoCutFreqSlider,
@@ -192,6 +200,8 @@ std::vector<juce::Component*> GnomeDistortAudioProcessorEditor::getComponents() 
 
         &LoCutSlopeSelect,
         &HiCutSlopeSelect,
-        &WaveshapeSelect
+        &WaveshapeSelect,
+
+        &displayComp
     };
 }
