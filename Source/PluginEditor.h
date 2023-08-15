@@ -11,13 +11,34 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 
-//==============================================================================
-/**
-*/
-struct CustomRotarySlider : juce::Slider {
-    CustomRotarySlider() : juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag, juce::Slider::TextEntryBoxPosition::NoTextBox) {
+struct LookAndFeelSliderLabledValues : juce::LookAndFeel_V4 {
+    void drawRotarySlider(juce::Graphics& g,
+                          int x, int y, int width, int height,
+                          float sliderPosProportional,
+                          float rotaryStartAngle, float rotaryEndAngle, juce::Slider&);
+};
 
+struct CustomRotarySliderLabeledValues : juce::Slider {
+    CustomRotarySliderLabeledValues(juce::RangedAudioParameter& rangedParam, const juce::String& suffix) :
+        juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag, juce::Slider::TextEntryBoxPosition::NoTextBox),
+        param(&rangedParam), unitSuffix(suffix) {
+        setLookAndFeel(&LNF);
     }
+
+    ~CustomRotarySliderLabeledValues() {
+        setLookAndFeel(nullptr);
+    }
+
+    void paint(juce::Graphics& g) override;
+    juce::Rectangle<int> getSliderBounds() const;
+    int getTextHeight() const { return 14; }
+    juce::String getDisplayString() const;
+
+private:
+    LookAndFeelSliderLabledValues LNF;
+
+    juce::RangedAudioParameter* param;
+    juce::String unitSuffix;
 };
 
 struct CustomSelect : juce::ComboBox {
@@ -58,7 +79,7 @@ private:
     // access the processor object that created it.
     GnomeDistortAudioProcessor& audioProcessor;
 
-    CustomRotarySlider LoCutFreqSlider, PeakFreqSlider, PeakGainSlider, PeakQSlider, HiCutFreqSlider, PreGainSlider, BiasSlider, WaveShapeAmountSlider, PostGainSlider;
+    CustomRotarySliderLabeledValues LoCutFreqSlider, PeakFreqSlider, PeakGainSlider, PeakQSlider, HiCutFreqSlider, PreGainSlider, BiasSlider, WaveShapeAmountSlider, PostGainSlider;
     CustomSelect LoCutSlopeSelect, HiCutSlopeSelect, WaveshapeSelect;
     DisplayComponent displayComp;
 

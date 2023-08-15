@@ -52,11 +52,11 @@ void updateCoefficients(Coefficients& old, const Coefficients& replace);
 Coefficients generatePeakFilter(const ChainSettings& chainSettings, double sampleRate);
 inline auto generateLoCutFilter(const ChainSettings& chainSettings, double sampleRate) {
     return juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(     // create array of filter coefficients for 4 possible slopes
-        chainSettings.LoCutFreq, sampleRate, (chainSettings.LoCutSlope + 1) * 2);
+                                                                                       chainSettings.LoCutFreq, sampleRate, (chainSettings.LoCutSlope + 1) * 2);
 }
 inline auto generateHiCutFilter(const ChainSettings& chainSettings, double sampleRate) {
     return juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(     // create array of filter coefficients for 4 possible slopes
-        chainSettings.HiCutFreq, sampleRate, (chainSettings.HiCutSlope + 1) * 2);
+                                                                                      chainSettings.HiCutFreq, sampleRate, (chainSettings.HiCutSlope + 1) * 2);
 }
 // template function can be used on left AND right channel
 template<typename ChainType, typename CoefficientsType> static void updateCutFilter(ChainType& filter, const CoefficientsType& cutCoefficients, const FilterSlope& slope) {

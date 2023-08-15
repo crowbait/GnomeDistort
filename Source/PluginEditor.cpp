@@ -9,15 +9,72 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+void LookAndFeelSliderLabledValues::drawRotarySlider(juce::Graphics& g,
+                                                     int x, int y, int width, int height,
+                                                     float sliderPosProportional,
+                                                     float rotaryStartAngle, float rotaryEndAngle, juce::Slider&) {
+    using namespace juce;
+    auto bounds = Rectangle<float>(x, y, width, height);
+    AffineTransform rotator;
+    juce::Image knob = juce::ImageCache::getFromMemory(BinaryData::knob_metal_silver_128_png, BinaryData::knob_metal_silver_128_pngSize);
+    int widthHeight = 128;
+    if (width < 96 || height < 96) {
+        knob = juce::ImageCache::getFromMemory(BinaryData::knob_metal_silver_64_png, BinaryData::knob_metal_silver_64_pngSize);
+        widthHeight = 64;
+    }
+    if (width < 52 || height < 52) {
+        knob = juce::ImageCache::getFromMemory(BinaryData::knob_metal_silver_48_png, BinaryData::knob_metal_silver_48_pngSize);
+        widthHeight = 48;
+    }
+
+    g.setOrigin((width / 2) - (widthHeight / 2), (height / 2) - (widthHeight / 2));
+    g.drawImageTransformed(knob, rotator.rotated(sliderPosProportional * rotaryEndAngle, widthHeight / 2, widthHeight / 2));
+}
+
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+
+void CustomRotarySliderLabeledValues::paint(juce::Graphics& g) {
+    using namespace juce;
+
+    auto minAngle = degreesToRadians(0.f);
+    auto maxAngle = degreesToRadians(270.f);
+    auto range = getRange();
+    auto sliderBounds = getSliderBounds();
+
+    getLookAndFeel().drawRotarySlider(
+        g, sliderBounds.getX(), sliderBounds.getY(), sliderBounds.getWidth(), sliderBounds.getHeight(),
+        jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0),   // normalize
+        minAngle, maxAngle,
+        *this
+    );
+}
+juce::Rectangle<int> CustomRotarySliderLabeledValues::getSliderBounds() const {
+    return getLocalBounds();
+}
+
+
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+
 DisplayComponent::DisplayComponent(GnomeDistortAudioProcessor& p) : audioProcessor(p) {
     const auto& params = audioProcessor.getParameters();    // register as listener to reflect parameter changes in UI
     for (auto param : params) {
+        // if (param->getName(64) == "LoCutFreq") param->addListener(this);
+        // or simply audioProcessor.getParameter("LoCutFreq")->addListener(this);
         param->addListener(this);
     }
     startTimerHz(60);   // timer for repaint
 }
 DisplayComponent::~DisplayComponent() {
     const auto& params = audioProcessor.getParameters();
+
     for (auto param : params) {
         param->removeListener(this);
     }
@@ -34,7 +91,7 @@ void DisplayComponent::paint(juce::Graphics& g) {
     const double outputMax = displayArea.getY();
 
     g.setColour(Colours::darkgrey);
-    g.drawRect(displayArea.toFloat());
+    g.fillRect(displayArea.toFloat());
 
     auto& loCut = monoChain.get<ChainPositions::LoCut>();
     auto& peak = monoChain.get<ChainPositions::Peak>();
@@ -91,6 +148,7 @@ void DisplayComponent::timerCallback() {
     }
 }
 
+
 //==============================================================================
 //==============================================================================
 //==============================================================================
@@ -98,8 +156,19 @@ void DisplayComponent::timerCallback() {
 
 GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortAudioProcessor& p)
     : AudioProcessorEditor(&p), audioProcessor(p),
-    displayComp(audioProcessor),
-    LoCutFreqSliderAttachment(audioProcessor.apvts, "LoCutFreq", LoCutFreqSlider),
+    LoCutFreqSlider(*audioProcessor.apvts.getParameter("LoCutFreq"), "Hz"), // init sliders
+    PeakFreqSlider(*audioProcessor.apvts.getParameter("PeakFreq"), "Hz"),
+    PeakGainSlider(*audioProcessor.apvts.getParameter("PeakGain"), ""),
+    PeakQSlider(*audioProcessor.apvts.getParameter("PeakQ"), ""),
+    HiCutFreqSlider(*audioProcessor.apvts.getParameter("HiCutFreq"), "Hz"),
+    PreGainSlider(*audioProcessor.apvts.getParameter("PreGain"), ""),
+    BiasSlider(*audioProcessor.apvts.getParameter("Bias"), ""),
+    WaveShapeAmountSlider(*audioProcessor.apvts.getParameter("WaveShap"), ""),
+    PostGainSlider(*audioProcessor.apvts.getParameter("PostGain"), ""),
+
+    displayComp(audioProcessor),    // init display
+
+    LoCutFreqSliderAttachment(audioProcessor.apvts, "LoCutFreq", LoCutFreqSlider),  // attach UI controls to parameters
     PeakFreqSliderAttachment(audioProcessor.apvts, "PeakFreq", PeakFreqSlider),
     PeakGainSliderAttachment(audioProcessor.apvts, "PeakGain", PeakGainSlider),
     PeakQSliderAttachment(audioProcessor.apvts, "PeakQ", PeakQSlider),
@@ -135,8 +204,8 @@ void GnomeDistortAudioProcessorEditor::paint(juce::Graphics& g) {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
-    //juce::Image background = ImageCache::getFromMemory(BinaryData::bg_png, BinaryData::bg_pngSize);
-    //g.drawImageAt(background, 0, 0);
+    // juce::Image background = juce::ImageCache::getFromMemory(BinaryData::bg_png, BinaryData::bg_pngSize);
+    // g.drawImageAt(background, 0, 0);
 }
 
 GnomeDistortAudioProcessorEditor::~GnomeDistortAudioProcessorEditor() {}

@@ -15,9 +15,9 @@ GnomeDistortAudioProcessor::GnomeDistortAudioProcessor()
     : AudioProcessor(BusesProperties()
 #if ! JucePlugin_IsMidiEffect
 #if ! JucePlugin_IsSynth
-        .withInput("Input", juce::AudioChannelSet::stereo(), true)
+                     .withInput("Input", juce::AudioChannelSet::stereo(), true)
 #endif
-        .withOutput("Output", juce::AudioChannelSet::stereo(), true)
+                     .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
     )
 #endif
@@ -315,12 +315,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout GnomeDistortAudioProcessor::
     juce::StringArray& slopeOptions = getSlopeOptions();
 
     layout.add(std::make_unique<juce::AudioParameterFloat>(         // Type: float (=range)
-        "LoCutFreq", "LoCutFreq",                                   // Parameter names
-        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f),  // Parameter range (20-20k, step-size 1, skew: <1 fills more of the slider with low range
-        20.f));                                                     // default value
+                                                           "LoCutFreq", "LoCutFreq",                                   // Parameter names
+                                                           juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f),  // Parameter range (20-20k, step-size 1, skew: <1 fills more of the slider with low range
+                                                           20.f));                                                     // default value
     layout.add(std::make_unique<juce::AudioParameterChoice>(        // Type: choice
-        "LoCutSlope", "LoCutSlope",                                 // Parameter names
-        slopeOptions, 1));                                          // Choices StringArray, default index
+                                                            "LoCutSlope", "LoCutSlope",                                 // Parameter names
+                                                            slopeOptions, 1));                                          // Choices StringArray, default index
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("PeakFreq", "PeakFreq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 1200.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("PeakGain", "PeakGain", juce::NormalisableRange<float>(-36.f, 36.f, 0.25f, 1.f), 0.f));
