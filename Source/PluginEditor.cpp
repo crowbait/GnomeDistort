@@ -59,6 +59,8 @@ void GnomeDistortAudioProcessorEditor::resized() {
     LoCutFreqSlider.setBounds(leftFilterArea);
     HiCutSlopeSelect.setBounds(rightFilterArea.removeFromBottom(selectHeight));
     HiCutFreqSlider.setBounds(rightFilterArea);
+    filterArea.removeFromLeft(padding);
+    filterArea.removeFromRight(padding);
     PeakFreqSlider.setBounds(filterArea.removeFromTop(filterArea.getHeight() * 0.5));
     PeakQSlider.setBounds(filterArea.removeFromLeft(filterArea.getWidth() * 0.5));
     PeakGainSlider.setBounds(filterArea);
@@ -67,7 +69,9 @@ void GnomeDistortAudioProcessorEditor::resized() {
     auto postDistArea = bounds.removeFromRight(bounds.getWidth() * 0.33);
     PreGainSlider.setBounds(preDistArea);
     PostGainSlider.setBounds(postDistArea);
-    BiasSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.25));
+    bounds.removeFromLeft(padding);
+    bounds.removeFromRight(padding);
+    BiasSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.33));
     WaveshapeSelect.setBounds(bounds.removeFromBottom(selectHeight));
     WaveShapeAmountSlider.setBounds(bounds);
 }
