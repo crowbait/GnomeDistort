@@ -9,35 +9,85 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-void LookAndFeelSliderLabledValues::drawRotarySlider(juce::Graphics& g,
+void LookAndFeelSliderValues::drawRotarySlider(juce::Graphics& g,
                                                      int x, int y, int width, int height,
                                                      float sliderPosProportional,
-                                                     float rotaryStartAngle, float rotaryEndAngle, juce::Slider&) {
+                                                     float rotaryStartAngle, float rotaryEndAngle, juce::Slider& slider) {
     using namespace juce;
     auto bounds = Rectangle<float>(x, y, width, height);
     auto center = bounds.getCentre();
+
+    // DEBUG: BOUNDS
+    // g.setColour(Colours::blue);
+    // g.drawRect(bounds.toFloat(), 1);
 
     // knob body
     g.setColour(Colour(110u, 10u, 10u));
     g.fillEllipse(bounds);
 
     // overlay
-    juce::Image overlay = juce::ImageCache::getFromMemory(BinaryData::knob_overlay_48_png, BinaryData::knob_overlay_48_pngSize);
+    juce::Image overlay = juce::ImageCache::getFromMemory(BinaryData::knob_overlay_128_png, BinaryData::knob_overlay_128_pngSize);
     g.drawImage(overlay, bounds, RectanglePlacement::stretchToFit);
 
+    if (auto* sldr = dynamic_cast<RotarySliderLabeledValues*>(&slider)) {
+        bool isSmall = sldr->getIsSmallText();
+        int textHeight = sldr->getTextHeight();
+
+        // label box
+        Rectangle<float> labelboxRect;
+        Path labelboxP;
+        String labeltext = sldr->getLabelString();
+        g.setFont(textHeight);
+        auto strWidthLabel = g.getCurrentFont().getStringWidth(labeltext); // replace with variable "text" for accuracy, 5 digits for all-same boxes
+        if (isSmall) {
+            labelboxRect.setSize(strWidthLabel + 2, sldr->getTextHeight() + 1);
+        } else {
+            labelboxRect.setSize(strWidthLabel + 4, sldr->getTextHeight() + 2);
+        }
+        labelboxRect.setCentre(center.getX(), center.getY() - bounds.getHeight() * 0.15);
+        labelboxP.addRoundedRectangle(labelboxRect, 2.f);
+        g.setColour(Colours::darkgrey);
+        g.strokePath(labelboxP, PathStrokeType(1));
+        g.setColour(Colours::black);
+        g.fillPath(labelboxP);
+
+        g.setColour(Colours::lightgrey);
+        g.drawFittedText(labeltext, labelboxRect.toNearestInt(), Justification::centred, 1);
+
+        // value box
+        Rectangle<float> valueboxRect;
+        Path valueboxP;
+        String valuetext = sldr->getDisplayString();
+        auto strWidthValue = g.getCurrentFont().getStringWidth("12345"); // replace with variable "text" for accuracy, 5 digits for all-same boxes
+        if (isSmall) {
+            valueboxRect.setSize(strWidthValue + 2, sldr->getTextHeight() + 1);
+        } else {
+            valueboxRect.setSize(strWidthValue + 4, sldr->getTextHeight() + 2);
+        }
+        valueboxRect.setCentre(center.getX(), center.getY() + bounds.getHeight() * 0.25);
+        valueboxP.addRoundedRectangle(valueboxRect, 2.f);
+        g.setColour(Colours::darkgrey);
+        g.strokePath(valueboxP, PathStrokeType(1));
+        g.setColour(Colours::black);
+        g.fillPath(valueboxP);
+
+        g.setColour(Colours::lightgrey);
+        g.drawFittedText(valuetext, valueboxRect.toNearestInt(), Justification::centred, 1);
+    }
+
     // indicator
-    Path p;
-    Rectangle<float> r;
-    r.setLeft(center.getX() - 2);
-    r.setRight(center.getX() + 2);
-    r.setTop(bounds.getY());
-    r.setBottom(center.getY());
-    p.addRectangle(r);
+    Rectangle<float> indicatorRect;
+    Path indicatorP;
+    indicatorRect.setLeft(center.getX() - 2);
+    indicatorRect.setRight(center.getX() + 2);
+    indicatorRect.setTop(bounds.getY());
+    indicatorRect.setBottom(center.getY());
+    indicatorP.addRectangle(indicatorRect);
     jassert(rotaryStartAngle < rotaryEndAngle);
     auto sliderAngRad = jmap(sliderPosProportional, 0.f, 1.f, rotaryStartAngle, rotaryEndAngle);
-    p.applyTransform(AffineTransform().rotated(sliderAngRad, center.getX(), center.getY()));
+    indicatorP.applyTransform(AffineTransform().rotated(sliderAngRad, center.getX(), center.getY()));
     g.setColour(Colours::lightgrey);
-    g.fillPath(p);
+    g.fillPath(indicatorP);
 }
 
 
@@ -46,14 +96,21 @@ void LookAndFeelSliderLabledValues::drawRotarySlider(juce::Graphics& g,
 //==============================================================================
 
 
-void CustomRotarySliderLabeledValues::paint(juce::Graphics& g) {
+void RotarySliderLabeledValues::paint(juce::Graphics& g) {
     using namespace juce;
 
+    Rectangle<int> bounds = getLocalBounds();
     auto minAngle = degreesToRadians(-135.f);
     auto maxAngle = degreesToRadians(135.f);
     auto range = getRange();
-    auto sliderBounds = getSliderBounds();
 
+    // DEBUG: BOUNDS
+    // g.setColour(Colours::red);
+    // g.drawRect(bounds.toFloat(), 1);
+    // g.setColour(Colours::orange);
+    // g.drawRect(bounds.toFloat(), 1);
+
+    auto sliderBounds = getSliderBounds(bounds);
     getLookAndFeel().drawRotarySlider(
         g, sliderBounds.getX(), sliderBounds.getY(), sliderBounds.getWidth(), sliderBounds.getHeight(),
         jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0),   // normalize
@@ -61,14 +118,17 @@ void CustomRotarySliderLabeledValues::paint(juce::Graphics& g) {
         *this
     );
 }
-juce::Rectangle<int> CustomRotarySliderLabeledValues::getSliderBounds() const {
-    auto bounds = getLocalBounds();
-    auto size = juce::jmin(bounds.getWidth(), bounds.getHeight()) - (getTextHeight() * 2);
+juce::Rectangle<int> RotarySliderLabeledValues::getSliderBounds(juce::Rectangle<int>& bounds) const {
+    auto size = juce::jmin(bounds.getWidth()-12, bounds.getHeight()-12);
     juce::Rectangle<int> r;
     r.setSize(size, size);
+    int textHeight = getTextHeight();
     r.setCentre(bounds.getCentreX(), 0);
-    r.setY(4);
+    r.setY(bounds.getY() + 2);
     return r;
+}
+juce::String RotarySliderLabeledValues::getDisplayString() const {
+    return juce::String(getValue());
 }
 
 
@@ -171,15 +231,15 @@ void DisplayComponent::timerCallback() {
 
 GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortAudioProcessor& p)
     : AudioProcessorEditor(&p), audioProcessor(p),
-    LoCutFreqSlider(*audioProcessor.apvts.getParameter("LoCutFreq"), "Hz"), // init sliders
-    PeakFreqSlider(*audioProcessor.apvts.getParameter("PeakFreq"), "Hz"),
-    PeakGainSlider(*audioProcessor.apvts.getParameter("PeakGain"), ""),
-    PeakQSlider(*audioProcessor.apvts.getParameter("PeakQ"), ""),
-    HiCutFreqSlider(*audioProcessor.apvts.getParameter("HiCutFreq"), "Hz"),
-    PreGainSlider(*audioProcessor.apvts.getParameter("PreGain"), ""),
-    BiasSlider(*audioProcessor.apvts.getParameter("Bias"), ""),
-    WaveShapeAmountSlider(*audioProcessor.apvts.getParameter("WaveShap"), ""),
-    PostGainSlider(*audioProcessor.apvts.getParameter("PostGain"), ""),
+    LoCutFreqSlider(*audioProcessor.apvts.getParameter("LoCutFreq"), "Hz", false, "LOW CUT"), // init sliders
+    PeakFreqSlider(*audioProcessor.apvts.getParameter("PeakFreq"), "Hz", true, "FREQ"),
+    PeakGainSlider(*audioProcessor.apvts.getParameter("PeakGain"), "", true, "GAIN"),
+    PeakQSlider(*audioProcessor.apvts.getParameter("PeakQ"), "", true, "Q"),
+    HiCutFreqSlider(*audioProcessor.apvts.getParameter("HiCutFreq"), "Hz", false, "HIGH CUT"),
+    PreGainSlider(*audioProcessor.apvts.getParameter("PreGain"), "", false, "GAIN"),
+    BiasSlider(*audioProcessor.apvts.getParameter("Bias"), "", false, "BIAS"),
+    WaveShapeAmountSlider(*audioProcessor.apvts.getParameter("WaveShap"), "", false, "DIST AMOUNT"),
+    PostGainSlider(*audioProcessor.apvts.getParameter("PostGain"), "", false, "GAIN"),
 
     displayComp(audioProcessor),    // init display
 

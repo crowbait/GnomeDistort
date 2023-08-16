@@ -11,34 +11,38 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 
-struct LookAndFeelSliderLabledValues : juce::LookAndFeel_V4 {
+struct LookAndFeelSliderValues : juce::LookAndFeel_V4 {
     void drawRotarySlider(juce::Graphics& g,
                           int x, int y, int width, int height,
                           float sliderPosProportional,
                           float rotaryStartAngle, float rotaryEndAngle, juce::Slider&);
 };
 
-struct CustomRotarySliderLabeledValues : juce::Slider {
-    CustomRotarySliderLabeledValues(juce::RangedAudioParameter& rangedParam, const juce::String& suffix) :
+struct RotarySliderLabeledValues : juce::Slider {
+    RotarySliderLabeledValues(juce::RangedAudioParameter& rangedParam, const juce::String& suffix, const bool smallValue, const juce::String& label) :
         juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag, juce::Slider::TextEntryBoxPosition::NoTextBox),
-        param(&rangedParam), unitSuffix(suffix) {
+        param(&rangedParam), unitSuffix(suffix), smallValueText(smallValue), labelText(label) {
         setLookAndFeel(&LNF);
     }
 
-    ~CustomRotarySliderLabeledValues() {
+    ~RotarySliderLabeledValues() {
         setLookAndFeel(nullptr);
     }
 
     void paint(juce::Graphics& g) override;
-    juce::Rectangle<int> getSliderBounds() const;
-    int getTextHeight() const { return 14; }
+    juce::Rectangle<int> getSliderBounds(juce::Rectangle<int>& bounds) const;
+    int getTextHeight() const { if (getIsSmallText()) return 8; return 12; }
     juce::String getDisplayString() const;
+    bool getIsSmallText() const { return smallValueText; };
+    juce::String getLabelString() const { return labelText; };
 
 private:
-    LookAndFeelSliderLabledValues LNF;
+    LookAndFeelSliderValues LNF;
 
     juce::RangedAudioParameter* param;
     juce::String unitSuffix;
+    bool smallValueText;
+    juce::String labelText;
 };
 
 struct CustomSelect : juce::ComboBox {
@@ -79,7 +83,7 @@ private:
     // access the processor object that created it.
     GnomeDistortAudioProcessor& audioProcessor;
 
-    CustomRotarySliderLabeledValues LoCutFreqSlider, PeakFreqSlider, PeakGainSlider, PeakQSlider, HiCutFreqSlider, PreGainSlider, BiasSlider, WaveShapeAmountSlider, PostGainSlider;
+    RotarySliderLabeledValues LoCutFreqSlider, PeakFreqSlider, PeakGainSlider, PeakQSlider, HiCutFreqSlider, PreGainSlider, BiasSlider, WaveShapeAmountSlider, PostGainSlider;
     CustomSelect LoCutSlopeSelect, HiCutSlopeSelect, WaveshapeSelect;
     DisplayComponent displayComp;
 
