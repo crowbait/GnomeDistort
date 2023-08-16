@@ -206,19 +206,13 @@ void DisplayComponent::resized() {
         ys.add(normalizedY);
         g.setColour(gdB == 0.f ? Colours::white : Colours::dimgrey);
         g.drawHorizontalLine(normalizedY, left, right);
-    }
-    g.setColour(Colours::dimgrey);
-    for (int i = 0; i < gains.size(); i++) {
-        float gdB = gains[i];
-        float y = ys[i];
 
         String str;
         str << gdB;
         str << "dB";
-
         Rectangle<int> r;
         r.setSize(g.getCurrentFont().getStringWidth(str), gridFontHeight);
-        r.setCentre(0, y);
+        r.setCentre(0, normalizedY);
         r.setX(2);
         g.drawFittedText(str, r, Justification::centred, 1);
     }
@@ -278,8 +272,6 @@ juce::Rectangle<int> DisplayComponent::getRenderArea() {
     auto bounds = getLocalBounds();
     bounds.removeFromLeft(24);
     bounds.removeFromTop(12);
-    // bounds.removeFromRight(0);
-    // bounds.removeFromBottom(0);
     return bounds;
 }
 
