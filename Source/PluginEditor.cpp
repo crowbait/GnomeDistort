@@ -123,8 +123,7 @@ juce::Rectangle<int> RotarySliderLabeledValues::getSliderBounds(juce::Rectangle<
     juce::Rectangle<int> r;
     r.setSize(size, size);
     int textHeight = getTextHeight();
-    r.setCentre(bounds.getCentreX(), 0);
-    r.setY(bounds.getY() + 2);
+    r.setCentre(bounds.getCentreX(), bounds.getCentreY());
     return r;
 }
 juce::String RotarySliderLabeledValues::getDisplayString() const {
