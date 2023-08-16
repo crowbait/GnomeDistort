@@ -158,14 +158,15 @@ void DisplayComponent::resized() {
     background = Image(Image::PixelFormat::RGB, getWidth(), getHeight(), true);
     Graphics g(background);
 
+    g.setColour(Colours::dimgrey);
+    g.setFont(gridFontHeight);
+
     // draw frequencies
     Array<float> freqs{
-        20, 30, 40, 50, 100,
-        200, 200, 300, 400, 500, 1000,
-        2000, 2000, 3000, 4000, 5000, 10000, 20000
+        20, 30, 50, 100,
+        200, 500, 1000,
+        2000, 5000, 10000, 20000
     };
-    g.setColour(Colours::dimgrey);
-
     Array<float> xs;
     for (float f : freqs) {
         float normalizedX = mapFromLog10(f, 20.f, 20000.f);  // same as in drawing filter response curve
@@ -174,15 +175,52 @@ void DisplayComponent::resized() {
     for (float x : xs) {
         g.drawVerticalLine(x, top, bottom);
     }
+    for (int i = 0; i < freqs.size(); i++) {
+        float f = freqs[i];
+        float x = xs[i];
+
+        bool addK = false;
+        String str;
+        if (f > 999.f) {
+            addK = true;
+            f /= 1000.f;
+        }
+        str << f;
+        if (addK) str << "k";
+        str << "Hz";
+
+        Rectangle<int> r;
+        r.setSize(g.getCurrentFont().getStringWidth(str), gridFontHeight);
+        r.setCentre(x-4, 0);
+        r.setY(1);
+        g.drawFittedText(str, r, Justification::centred, 1);
+    }
 
     // draw gains
     Array<float> gains{
         -36, -24, -12, 0, 12, 24, 36
     };
+    Array<float> ys;
     for (float gdB : gains) {
         auto normalizedY = jmap(gdB, -36.f, 36.f, (float)bottom, (float)top);
+        ys.add(normalizedY);
         g.setColour(gdB == 0.f ? Colours::white : Colours::dimgrey);
         g.drawHorizontalLine(normalizedY, left, right);
+    }
+    g.setColour(Colours::dimgrey);
+    for (int i = 0; i < gains.size(); i++) {
+        float gdB = gains[i];
+        float y = ys[i];
+
+        String str;
+        str << gdB;
+        str << "dB";
+
+        Rectangle<int> r;
+        r.setSize(g.getCurrentFont().getStringWidth(str), gridFontHeight);
+        r.setCentre(0, y);
+        r.setX(2);
+        g.drawFittedText(str, r, Justification::centred, 1);
     }
 }
 
@@ -249,6 +287,7 @@ juce::Rectangle<int> DisplayComponent::getAnalysisArea() {
     auto bounds = getRenderArea();
     bounds.removeFromTop(4);
     bounds.removeFromBottom(4);
+    bounds.removeFromRight(8);
     return bounds;
 }
 
