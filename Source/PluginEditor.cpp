@@ -204,8 +204,6 @@ void DisplayComponent::updateChain() {
     updateCoefficients(monoChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
     auto hiCoefficients = generateHiCutFilter(chainSettings, audioProcessor.getSampleRate());
     updateCutFilter(monoChain.get<ChainPositions::HiCut>(), hiCoefficients, static_cast<FilterSlope>(chainSettings.HiCutSlope));
-
-    repaint();
 }
 
 void DisplayComponent::parameterValueChanged(int parameterIndex, float newValue) {
@@ -215,6 +213,7 @@ void DisplayComponent::parameterValueChanged(int parameterIndex, float newValue)
 void DisplayComponent::timerCallback() {
     if (parametersChanged.compareAndSetBool(false, true)) {
         updateChain();
+        repaint();
     }
 }
 
