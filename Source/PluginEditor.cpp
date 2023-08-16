@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "SingleChannelSampleFifo.h"
 
 void LookAndFeelSliderValues::drawRotarySlider(juce::Graphics& g,
                                                int x, int y, int width, int height,

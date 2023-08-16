@@ -15,6 +15,9 @@
       <FILE id="dvdtOQ" name="bg.png" compile="0" resource="1" file="Source/Resources/bg.png"/>
     </GROUP>
     <GROUP id="{90ED5E9F-AA5E-20A2-C944-3AE53E8FFA07}" name="Source">
+      <FILE id="QcGh7u" name="Fifo.h" compile="0" resource="0" file="Source/Fifo.h"/>
+      <FILE id="OhJb9p" name="SingleChannelSampleFifo.h" compile="0" resource="0"
+            file="Source/SingleChannelSampleFifo.h"/>
       <FILE id="NCHjNI" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="nkEfmZ" name="PluginProcessor.h" compile="0" resource="0"
