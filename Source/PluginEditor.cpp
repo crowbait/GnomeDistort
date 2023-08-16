@@ -8,7 +8,6 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "SingleChannelSampleFifo.h"
 
 void LookAndFeelSliderValues::drawRotarySlider(juce::Graphics& g,
                                                int x, int y, int width, int height,
@@ -23,7 +22,7 @@ void LookAndFeelSliderValues::drawRotarySlider(juce::Graphics& g,
     // g.drawRect(bounds.toFloat(), 1);
 
     // knob body
-    g.setColour(Colour(110u, 10u, 10u));
+    g.setColour(COLOR_KNOB);
     g.fillEllipse(bounds);
 
     if (auto* sldr = dynamic_cast<RotarySliderLabeledValues*>(&slider)) {
@@ -43,7 +42,7 @@ void LookAndFeelSliderValues::drawRotarySlider(juce::Graphics& g,
         labelboxP.addRoundedRectangle(labelboxRect, 2.f);
         g.setColour(Colours::darkgrey);
         g.strokePath(labelboxP, PathStrokeType(1));
-        g.setColour(Colours::black);
+        g.setColour(COLOR_BG_VERYDARK);
         g.fillPath(labelboxP);
 
         g.setColour(Colours::lightgrey);
@@ -59,7 +58,7 @@ void LookAndFeelSliderValues::drawRotarySlider(juce::Graphics& g,
         valueboxP.addRoundedRectangle(valueboxRect, 2.f);
         g.setColour(Colours::darkgrey);
         g.strokePath(valueboxP, PathStrokeType(1));
-        g.setColour(Colours::black);
+        g.setColour(COLOR_BG_VERYDARK);
         g.fillPath(valueboxP);
 
         g.setColour(Colours::lightgrey);
@@ -94,12 +93,6 @@ void RotarySliderLabeledValues::paint(juce::Graphics& g) {
     auto minAngle = degreesToRadians(-135.f);
     auto maxAngle = degreesToRadians(135.f);
     auto range = getRange();
-
-    // DEBUG: BOUNDS
-    // g.setColour(Colours::red);
-    // g.drawRect(bounds.toFloat(), 1);
-    // g.setColour(Colours::orange);
-    // g.drawRect(bounds.toFloat(), 1);
 
     auto sliderBounds = getSliderBounds(bounds);
     getLookAndFeel().drawRotarySlider(
@@ -159,6 +152,9 @@ void DisplayComponent::resized() {
     background = Image(Image::PixelFormat::RGB, getWidth(), getHeight(), true);
     Graphics g(background);
 
+    g.setColour(COLOR_BG_VERYDARK);
+    g.fillRect(getLocalBounds().toFloat());
+
     g.setColour(Colours::dimgrey);
     g.setFont(gridFontHeight);
 
@@ -205,7 +201,7 @@ void DisplayComponent::resized() {
     for (float gdB : gains) {
         auto normalizedY = jmap(gdB, -36.f, 36.f, (float)bottom, (float)top);
         ys.add(normalizedY);
-        g.setColour(gdB == 0.f ? Colours::white : Colours::dimgrey);
+        g.setColour(gdB == 0.f ? Colours::grey : Colours::dimgrey);
         g.drawHorizontalLine(normalizedY, left, right);
 
         String str;
@@ -230,7 +226,7 @@ void DisplayComponent::paint(juce::Graphics& g) {
     const double outputMin = renderArea.getBottom();
     const double outputMax = renderArea.getY();
 
-    g.setColour(Colours::black);
+    g.setColour(COLOR_BG_VERYDARK);
     g.fillRect(displayArea.toFloat());
     g.drawImage(background, displayArea.toFloat());
 
