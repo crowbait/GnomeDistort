@@ -38,12 +38,7 @@ void LookAndFeelSliderValues::drawRotarySlider(juce::Graphics& g,
         Path labelboxP;
         String labeltext = sldr->getLabelString();
         g.setFont(textHeight);
-        auto strWidthLabel = g.getCurrentFont().getStringWidth(labeltext); // replace with variable "text" for accuracy, 5 digits for all-same boxes
-        if (isSmall) {
-            labelboxRect.setSize(strWidthLabel + 2, sldr->getTextHeight() + 1);
-        } else {
-            labelboxRect.setSize(strWidthLabel + 4, sldr->getTextHeight() + 2);
-        }
+        labelboxRect.setSize(g.getCurrentFont().getStringWidth(labeltext) + (isSmall ? 2 : 4), sldr->getTextHeight() + (isSmall ? 1 : 2));
         labelboxRect.setCentre(center.getX(), center.getY() - bounds.getHeight() * 0.15);
         labelboxP.addRoundedRectangle(labelboxRect, 2.f);
         g.setColour(Colours::darkgrey);
@@ -59,11 +54,7 @@ void LookAndFeelSliderValues::drawRotarySlider(juce::Graphics& g,
         Path valueboxP;
         String valuetext = sldr->getDisplayString();
         auto strWidthValue = g.getCurrentFont().getStringWidth("12345"); // replace with variable "text" for accuracy, 5 digits for all-same boxes
-        if (isSmall) {
-            valueboxRect.setSize(strWidthValue + 2, sldr->getTextHeight() + 1);
-        } else {
-            valueboxRect.setSize(strWidthValue + 4, sldr->getTextHeight() + 2);
-        }
+        valueboxRect.setSize(strWidthValue + (isSmall ? 2 : 4), sldr->getTextHeight() + (isSmall ? 1 : 2));
         valueboxRect.setCentre(center.getX(), center.getY() + bounds.getHeight() * 0.25);
         valueboxP.addRoundedRectangle(valueboxRect, 2.f);
         g.setColour(Colours::darkgrey);
@@ -127,7 +118,8 @@ juce::Rectangle<int> RotarySliderLabeledValues::getSliderBounds(juce::Rectangle<
     return r;
 }
 juce::String RotarySliderLabeledValues::getDisplayString() const {
-    return juce::String(getValue());
+    juce::String str;
+    return juce::String((float)getValue(), getDecimals() ? 2 : 0);
 }
 
 
@@ -230,15 +222,15 @@ void DisplayComponent::timerCallback() {
 
 GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortAudioProcessor& p)
     : AudioProcessorEditor(&p), audioProcessor(p),
-    LoCutFreqSlider(*audioProcessor.apvts.getParameter("LoCutFreq"), false, "LOW CUT"), // init sliders
-    PeakFreqSlider(*audioProcessor.apvts.getParameter("PeakFreq"), true, "FREQ"),
-    PeakGainSlider(*audioProcessor.apvts.getParameter("PeakGain"), true, "GAIN"),
-    PeakQSlider(*audioProcessor.apvts.getParameter("PeakQ"), true, "Q"),
-    HiCutFreqSlider(*audioProcessor.apvts.getParameter("HiCutFreq"), false, "HIGH CUT"),
-    PreGainSlider(*audioProcessor.apvts.getParameter("PreGain"), false, "GAIN"),
-    BiasSlider(*audioProcessor.apvts.getParameter("Bias"), false, "BIAS"),
-    WaveShapeAmountSlider(*audioProcessor.apvts.getParameter("WaveShapeAmount"), false, "DIST AMOUNT"),
-    PostGainSlider(*audioProcessor.apvts.getParameter("PostGain"), false, "GAIN"),
+    LoCutFreqSlider(*audioProcessor.apvts.getParameter("LoCutFreq"), false, "LOW CUT", false), // init sliders
+    PeakFreqSlider(*audioProcessor.apvts.getParameter("PeakFreq"), true, "FREQ", false),
+    PeakGainSlider(*audioProcessor.apvts.getParameter("PeakGain"), true, "GAIN", true),
+    PeakQSlider(*audioProcessor.apvts.getParameter("PeakQ"), true, "Q", true),
+    HiCutFreqSlider(*audioProcessor.apvts.getParameter("HiCutFreq"), false, "HIGH CUT", false),
+    PreGainSlider(*audioProcessor.apvts.getParameter("PreGain"), false, "GAIN", true),
+    BiasSlider(*audioProcessor.apvts.getParameter("Bias"), false, "BIAS", true),
+    WaveShapeAmountSlider(*audioProcessor.apvts.getParameter("WaveShapeAmount"), false, "DIST AMOUNT", true),
+    PostGainSlider(*audioProcessor.apvts.getParameter("PostGain"), false, "GAIN", true),
 
     displayComp(audioProcessor),    // init display
 

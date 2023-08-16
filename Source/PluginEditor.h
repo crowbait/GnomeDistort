@@ -19,9 +19,9 @@ struct LookAndFeelSliderValues : juce::LookAndFeel_V4 {
 };
 
 struct RotarySliderLabeledValues : juce::Slider {
-    RotarySliderLabeledValues(juce::RangedAudioParameter& rangedParam, const bool smallValue, const juce::String& label) :
+    RotarySliderLabeledValues(juce::RangedAudioParameter& rangedParam, const bool smallValue, const juce::String& label, const bool showDecimals) :
         juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag, juce::Slider::TextEntryBoxPosition::NoTextBox),
-        param(&rangedParam),, smallValueText(smallValue), labelText(label) {
+        param(&rangedParam), smallValueText(smallValue), labelText(label), decimals(showDecimals) {
         setLookAndFeel(&LNF);
     }
 
@@ -32,15 +32,18 @@ struct RotarySliderLabeledValues : juce::Slider {
     void paint(juce::Graphics& g) override;
     juce::Rectangle<int> getSliderBounds(juce::Rectangle<int>& bounds) const;
     int getTextHeight() const { if (getIsSmallText()) return 8; return 12; }
-    juce::String getDisplayString() const;
     bool getIsSmallText() const { return smallValueText; };
+    bool getDecimals() const { return decimals; };
+    juce::String getDisplayString() const;
     juce::String getLabelString() const { return labelText; };
+
 
 private:
     LookAndFeelSliderValues LNF;
 
     juce::RangedAudioParameter* param;
     bool smallValueText;
+    bool decimals;
     juce::String labelText;
 };
 
