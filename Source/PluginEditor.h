@@ -74,6 +74,8 @@ private:
     MonoChain monoChain;
 
     juce::Image background;
+    juce::Rectangle<int> getRenderArea();
+    juce::Rectangle<int> getAnalysisArea();
 };
 
 // =======================================================
@@ -106,6 +108,8 @@ private:
     SelectAttachment LoCutSlopeSelectAttachment, HiCutSlopeSelectAttachment, WaveshapeSelectAttachment;
 
     std::vector<juce::Component*> getComponents();
+
+    juce::Image knobOverlay;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GnomeDistortAudioProcessorEditor)
 };

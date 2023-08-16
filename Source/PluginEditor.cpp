@@ -147,27 +147,64 @@ DisplayComponent::~DisplayComponent() {
 }
 
 void DisplayComponent::resized() {
+    using namespace juce;
+    auto bounds = getAnalysisArea();
+    int left = bounds.getX();
+    int right = bounds.getRight();
+    int top = bounds.getY();
+    int bottom = bounds.getBottom();
+    int width = bounds.getWidth();
+    int height = bounds.getHeight();
+    background = Image(Image::PixelFormat::RGB, getWidth(), getHeight(), true);
+    Graphics g(background);
 
+    // draw frequencies
+    Array<float> freqs{
+        20, 30, 40, 50, 100,
+        200, 200, 300, 400, 500, 1000,
+        2000, 2000, 3000, 4000, 5000, 10000, 20000
+    };
+    g.setColour(Colours::dimgrey);
+
+    Array<float> xs;
+    for (float f : freqs) {
+        float normalizedX = mapFromLog10(f, 20.f, 20000.f);  // same as in drawing filter response curve
+        xs.add(left + width * normalizedX);
+    }
+    for (float x : xs) {
+        g.drawVerticalLine(x, top, bottom);
+    }
+
+    // draw gains
+    Array<float> gains{
+        -36, -24, -12, 0, 12, 24, 36
+    };
+    for (float gdB : gains) {
+        auto normalizedY = jmap(gdB, -36.f, 36.f, (float)bottom, (float)top);
+        g.setColour(gdB == 0.f ? Colours::white : Colours::dimgrey);
+        g.drawHorizontalLine(normalizedY, left, right);
+    }
 }
 
 void DisplayComponent::paint(juce::Graphics& g) {
     using namespace juce;
 
-    // spectrum
     auto displayArea = getLocalBounds();
+    auto renderArea = getRenderArea();
+    auto analysisArea = getAnalysisArea();
 
-    const int width = displayArea.getWidth();
-    const double outputMin = displayArea.getBottom();
-    const double outputMax = displayArea.getY();
+    const int width = renderArea.getWidth();
+    const double outputMin = renderArea.getBottom();
+    const double outputMax = renderArea.getY();
 
-    g.setColour(Colours::darkgrey);
+    g.setColour(Colours::black);
     g.fillRect(displayArea.toFloat());
+    g.drawImage(background, displayArea.toFloat());
 
     auto& loCut = monoChain.get<ChainPositions::LoCut>();
     auto& peak = monoChain.get<ChainPositions::Peak>();
     auto& hiCut = monoChain.get<ChainPositions::HiCut>();
     auto& postWaveshaper = monoChain.get<ChainPositions::WaveshaperMakeupGain>();
-
     auto sampleRate = audioProcessor.getSampleRate();
 
     // get filter magnitudes
@@ -191,12 +228,28 @@ void DisplayComponent::paint(juce::Graphics& g) {
     }
     Path filterResponseCurve;
     auto map = [outputMin, outputMax](double input) { return jmap(input, -36.0, 36.0, outputMin, outputMax); };
-    filterResponseCurve.startNewSubPath(displayArea.getX(), map(magnitudes.front()));
+    filterResponseCurve.startNewSubPath(analysisArea.getX(), map(magnitudes.front()));
     for (int i = 1; i < magnitudes.size(); i++) {   // set path for every pixel
-        filterResponseCurve.lineTo(displayArea.getX() + i, map(magnitudes[i]));
+        filterResponseCurve.lineTo(analysisArea.getX() + i, map(magnitudes[i]));
     }
-    g.setColour(Colours::lightgoldenrodyellow);
-    g.strokePath(filterResponseCurve, PathStrokeType(2));   // draw path
+    g.setColour(Colours::yellow);
+    g.strokePath(filterResponseCurve, PathStrokeType(3));   // draw path
+}
+
+juce::Rectangle<int> DisplayComponent::getRenderArea() {
+    auto bounds = getLocalBounds();
+    bounds.removeFromLeft(24);
+    bounds.removeFromTop(12);
+    // bounds.removeFromRight(0);
+    // bounds.removeFromBottom(0);
+    return bounds;
+}
+
+juce::Rectangle<int> DisplayComponent::getAnalysisArea() {
+    auto bounds = getRenderArea();
+    bounds.removeFromTop(4);
+    bounds.removeFromBottom(4);
+    return bounds;
 }
 
 void DisplayComponent::updateChain() {
@@ -300,8 +353,8 @@ void GnomeDistortAudioProcessorEditor::resized() {
     bounds.removeFromBottom(padding * 2);
 
     auto displayArea = bounds.removeFromTop(bounds.getHeight() * 0.25f);
-    displayArea.removeFromLeft(padding);
-    displayArea.removeFromRight(padding);
+    // displayArea.removeFromLeft(padding);
+    // displayArea.removeFromRight(padding);
     displayArea.removeFromTop(padding);
     displayArea.removeFromBottom(padding * 2);
     displayComp.setBounds(displayArea);    // 25%
