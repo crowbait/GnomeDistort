@@ -104,7 +104,7 @@ void RotarySliderLabeledValues::paint(juce::Graphics& g) {
     auto sliderBounds = getSliderBounds(bounds);
     getLookAndFeel().drawRotarySlider(
         g, sliderBounds.getX(), sliderBounds.getY(), sliderBounds.getWidth(), sliderBounds.getHeight(),
-        jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0),   // normalize
+        valueToProportionOfLength(getValue()), // jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0),   // normalize
         minAngle, maxAngle,
         *this
     );
