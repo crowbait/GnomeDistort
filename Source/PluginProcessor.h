@@ -25,7 +25,7 @@ enum WaveShaperFunction {
 };
 
 struct ChainSettings {
-    float LoCutFreq{ 0 }, PeakFreq{ 0 }, PeakGain{ 0 }, PeakQ{ 0 }, HiCutFreq{ 0 }, PreGain{ 0 }, Bias{ 0 }, WaveShapeAmount{ 0 }, PostGain{ 0 };
+    float LoCutFreq{ 0 }, PeakFreq{ 0 }, PeakGain{ 0 }, PeakQ{ 0 }, HiCutFreq{ 0 }, PreGain{ 0 }, Bias{ 0 }, WaveShapeAmount{ 0 }, PostGain{ 0 }, Mix{ 0 };
     int LoCutSlope{ FilterSlope::Slope12 }, HiCutSlope{ FilterSlope::Slope12 }, WaveShapeFunction{ WaveShaperFunction::HardClip };
 };
 
@@ -129,6 +129,7 @@ public:
 
 private:
     MonoChain leftChain, rightChain;    // stereo
+    juce::dsp::DryWetMixer<float> drywetL, drywetR;
 
 
     //==============================================================================

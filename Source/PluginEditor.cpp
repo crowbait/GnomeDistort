@@ -10,9 +10,9 @@
 #include "PluginEditor.h"
 
 void LookAndFeelSliderValues::drawRotarySlider(juce::Graphics& g,
-                                                     int x, int y, int width, int height,
-                                                     float sliderPosProportional,
-                                                     float rotaryStartAngle, float rotaryEndAngle, juce::Slider& slider) {
+                                               int x, int y, int width, int height,
+                                               float sliderPosProportional,
+                                               float rotaryStartAngle, float rotaryEndAngle, juce::Slider& slider) {
     using namespace juce;
     auto bounds = Rectangle<float>(x, y, width, height);
     auto center = bounds.getCentre();
@@ -39,7 +39,7 @@ void LookAndFeelSliderValues::drawRotarySlider(juce::Graphics& g,
         String labeltext = sldr->getLabelString();
         g.setFont(textHeight);
         labelboxRect.setSize(g.getCurrentFont().getStringWidth(labeltext) + (isSmall ? 2 : 4), sldr->getTextHeight() + (isSmall ? 1 : 2));
-        labelboxRect.setCentre(center.getX(), center.getY() - bounds.getHeight() * 0.15);
+        labelboxRect.setCentre(center.getX(), center.getY() - bounds.getHeight() * 0.15f);
         labelboxP.addRoundedRectangle(labelboxRect, 2.f);
         g.setColour(Colours::darkgrey);
         g.strokePath(labelboxP, PathStrokeType(1));
@@ -55,7 +55,7 @@ void LookAndFeelSliderValues::drawRotarySlider(juce::Graphics& g,
         String valuetext = sldr->getDisplayString();
         auto strWidthValue = g.getCurrentFont().getStringWidth("12345"); // replace with variable "text" for accuracy, 5 digits for all-same boxes
         valueboxRect.setSize(strWidthValue + (isSmall ? 2 : 4), sldr->getTextHeight() + (isSmall ? 1 : 2));
-        valueboxRect.setCentre(center.getX(), center.getY() + bounds.getHeight() * 0.25);
+        valueboxRect.setCentre(center.getX(), center.getY() + bounds.getHeight() * 0.25f);
         valueboxP.addRoundedRectangle(valueboxRect, 2.f);
         g.setColour(Colours::darkgrey);
         g.strokePath(valueboxP, PathStrokeType(1));
@@ -110,7 +110,7 @@ void RotarySliderLabeledValues::paint(juce::Graphics& g) {
     );
 }
 juce::Rectangle<int> RotarySliderLabeledValues::getSliderBounds(juce::Rectangle<int>& bounds) const {
-    auto size = juce::jmin(bounds.getWidth()-12, bounds.getHeight()-12);
+    auto size = juce::jmin(bounds.getWidth() - 12, bounds.getHeight() - 12);
     juce::Rectangle<int> r;
     r.setSize(size, size);
     int textHeight = getTextHeight();
@@ -231,6 +231,7 @@ GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortA
     BiasSlider(*audioProcessor.apvts.getParameter("Bias"), false, "BIAS", true),
     WaveShapeAmountSlider(*audioProcessor.apvts.getParameter("WaveShapeAmount"), false, "DIST AMOUNT", true),
     PostGainSlider(*audioProcessor.apvts.getParameter("PostGain"), false, "GAIN", true),
+    DryWetSlider(*audioProcessor.apvts.getParameter("DryWet"), false, "MIX", true),
 
     displayComp(audioProcessor),    // init display
 
@@ -243,6 +244,7 @@ GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortA
     BiasSliderAttachment(audioProcessor.apvts, "Bias", BiasSlider),
     WaveShapeAmountSliderAttachment(audioProcessor.apvts, "WaveShapeAmount", WaveShapeAmountSlider),
     PostGainSliderAttachment(audioProcessor.apvts, "PostGain", PostGainSlider),
+    DryWetSliderAttachment(audioProcessor.apvts, "DryWet", DryWetSlider),
     LoCutSlopeSelectAttachment(audioProcessor.apvts, "LoCutSlope", LoCutSlopeSelect),
     HiCutSlopeSelectAttachment(audioProcessor.apvts, "HiCutSlope", HiCutSlopeSelect),
     WaveshapeSelectAttachment(audioProcessor.apvts, "WaveShapeFunction", WaveshapeSelect) {
@@ -289,34 +291,35 @@ void GnomeDistortAudioProcessorEditor::resized() {
     bounds.removeFromRight(padding * 2);
     bounds.removeFromBottom(padding * 2);
 
-    auto displayArea = bounds.removeFromTop(bounds.getHeight() * 0.25);
+    auto displayArea = bounds.removeFromTop(bounds.getHeight() * 0.25f);
     displayArea.removeFromLeft(padding);
     displayArea.removeFromRight(padding);
     displayArea.removeFromTop(padding);
     displayArea.removeFromBottom(padding * 2);
     displayComp.setBounds(displayArea);    // 25%
 
-    auto filterArea = bounds.removeFromTop(bounds.getHeight() * 0.33);      // 75*0.33=25%
-    auto leftFilterArea = filterArea.removeFromLeft(filterArea.getWidth() * 0.25);
-    auto rightFilterArea = filterArea.removeFromRight(filterArea.getWidth() * 0.33);
+    auto filterArea = bounds.removeFromTop(bounds.getHeight() * 0.33f);      // 75*0.33=25%
+    auto leftFilterArea = filterArea.removeFromLeft(filterArea.getWidth() * 0.25f);
+    auto rightFilterArea = filterArea.removeFromRight(filterArea.getWidth() * 0.33f);
     LoCutSlopeSelect.setBounds(leftFilterArea.removeFromBottom(selectHeight));
     LoCutFreqSlider.setBounds(leftFilterArea);
     HiCutSlopeSelect.setBounds(rightFilterArea.removeFromBottom(selectHeight));
     HiCutFreqSlider.setBounds(rightFilterArea);
     filterArea.removeFromLeft(padding);
     filterArea.removeFromRight(padding);
-    PeakGainSlider.setBounds(filterArea.removeFromTop(filterArea.getHeight() * 0.5));
-    PeakFreqSlider.setBounds(filterArea.removeFromLeft(filterArea.getWidth() * 0.5));
+    PeakGainSlider.setBounds(filterArea.removeFromTop(filterArea.getHeight() * 0.5f));
+    PeakFreqSlider.setBounds(filterArea.removeFromLeft(filterArea.getWidth() * 0.5f));
     PeakQSlider.setBounds(filterArea);
 
     bounds.removeFromTop(padding * 2);
-    auto preDistArea = bounds.removeFromLeft(bounds.getWidth() * 0.25);
-    auto postDistArea = bounds.removeFromRight(bounds.getWidth() * 0.33);
+    auto preDistArea = bounds.removeFromLeft(bounds.getWidth() * 0.25f);
+    auto postDistArea = bounds.removeFromRight(bounds.getWidth() * 0.33f);
     PreGainSlider.setBounds(preDistArea);
-    PostGainSlider.setBounds(postDistArea);
+    PostGainSlider.setBounds(postDistArea.removeFromTop(postDistArea.getHeight() * 0.5f));
+    DryWetSlider.setBounds(postDistArea);
     bounds.removeFromLeft(padding);
     bounds.removeFromRight(padding);
-    BiasSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.33));
+    BiasSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.33f));
     WaveshapeSelect.setBounds(bounds.removeFromBottom(selectHeight));
     WaveShapeAmountSlider.setBounds(bounds);
 }
@@ -332,6 +335,7 @@ std::vector<juce::Component*> GnomeDistortAudioProcessorEditor::getComponents() 
         &BiasSlider,
         &WaveShapeAmountSlider,
         &PostGainSlider,
+        &DryWetSlider,
 
         &LoCutSlopeSelect,
         &HiCutSlopeSelect,

@@ -85,7 +85,7 @@ private:
     // access the processor object that created it.
     GnomeDistortAudioProcessor& audioProcessor;
 
-    RotarySliderLabeledValues LoCutFreqSlider, PeakFreqSlider, PeakGainSlider, PeakQSlider, HiCutFreqSlider, PreGainSlider, BiasSlider, WaveShapeAmountSlider, PostGainSlider;
+    RotarySliderLabeledValues LoCutFreqSlider, PeakFreqSlider, PeakGainSlider, PeakQSlider, HiCutFreqSlider, PreGainSlider, BiasSlider, WaveShapeAmountSlider, PostGainSlider, DryWetSlider;
     CustomSelect LoCutSlopeSelect, HiCutSlopeSelect, WaveshapeSelect;
     DisplayComponent displayComp;
 
@@ -93,7 +93,7 @@ private:
     using SliderAttachment = APVTS::SliderAttachment;
     using SelectAttachment = APVTS::ComboBoxAttachment;
     SliderAttachment LoCutFreqSliderAttachment, PeakFreqSliderAttachment, PeakGainSliderAttachment, PeakQSliderAttachment,
-        HiCutFreqSliderAttachment, PreGainSliderAttachment, BiasSliderAttachment, WaveShapeAmountSliderAttachment, PostGainSliderAttachment;
+        HiCutFreqSliderAttachment, PreGainSliderAttachment, BiasSliderAttachment, WaveShapeAmountSliderAttachment, PostGainSliderAttachment, DryWetSliderAttachment;
     SelectAttachment LoCutSlopeSelectAttachment, HiCutSlopeSelectAttachment, WaveshapeSelectAttachment;
 
     std::vector<juce::Component*> getComponents();
