@@ -10,7 +10,6 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
-#include "SingleChannelSampleFifo.h"
 
 inline juce::Colour COLOR_BG = juce::Colour(50u, 50u, 50u);
 inline juce::Colour COLOR_BG_VERYDARK = juce::Colour(18u, 18u, 18u);

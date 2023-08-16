@@ -9,6 +9,8 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "SingleChannelSampleFifo.h"
+
 enum FilterSlope {
     Slope12,
     Slope24,
@@ -126,6 +128,10 @@ public:
     juce::AudioProcessorValueTreeState apvts{ *this, nullptr, "Parameters", createParameterLayout() };
     static juce::StringArray getSlopeOptions();
     static juce::StringArray getWaveshaperOptions();
+
+    using BlockType = juce::AudioBuffer<float>;
+    SingleChannelSampleFifo<BlockType> leftPreProcessingFifo{ Channel::Left };
+    SingleChannelSampleFifo<BlockType> leftPostProcessingFifo{ Channel::Left };
 
 private:
     MonoChain leftChain, rightChain;    // stereo

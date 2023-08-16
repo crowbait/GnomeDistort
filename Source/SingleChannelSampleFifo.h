@@ -33,15 +33,15 @@ struct SingleChannelSampleFifo {
         prepared.set(false);
         size.set(bufferSize);
 
-        buffer.ToFill.setSize(1, bufferSize, false, true, true);
-        audioBuffer.prepare(1, bufferSize);
+        bufferToFill.setSize(1, bufferSize, false, true, true);
+        audioBufferFifo.prepare(1, bufferSize);
         fifoIndex = 0;
         prepared.set(true);
     }
 
-    int getNumCompletedBuffersAvailable() const { return audoBuffer.getNumAvailableForReadeing(); }
+    int getNumCompletedBuffersAvailable() const { return audioBufferFifo.getNumAvailableForReading(); }
     bool isPrepared() const { return prepared.get(); }
-    int getSize() const {return size.get() }
+    int getSize() const { return size.get() }
     bool getAudioBuffer(BlockType& buf) { return audioBuffer.pull(buf); }
 
 private:

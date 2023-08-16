@@ -222,6 +222,9 @@ void GnomeDistortAudioProcessor::prepareToPlay(double sampleRate, int samplesPer
     drywetR.setMixingRule(juce::dsp::DryWetMixingRule::linear);
     drywetL.setWetMixProportion(chainSettings.Mix);
     drywetR.setWetMixProportion(chainSettings.Mix);
+
+    leftPreProcessingFifo.prepare(samplesPerBlock);
+    leftPostProcessingFifo.prepare(samplesPerBlock);
 }
 
 
@@ -278,6 +281,8 @@ void GnomeDistortAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, 
     auto leftBlock = block.getSingleChannelBlock(0);
     auto rightBlock = block.getSingleChannelBlock(1);
 
+    leftPreProcessingFifo.update(buffer);
+
     drywetL.setWetMixProportion(chainSettings.Mix);
     drywetR.setWetMixProportion(chainSettings.Mix);
     drywetL.pushDrySamples(leftBlock);
@@ -287,6 +292,8 @@ void GnomeDistortAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, 
     juce::dsp::ProcessContextReplacing<float> rightContext(rightBlock);
     leftChain.process(leftContext);                                         // process
     rightChain.process(rightContext);
+
+    leftPostProcessingFifo.update(buffer);
 
     drywetL.mixWetSamples(leftBlock);
     drywetR.mixWetSamples(rightBlock);
