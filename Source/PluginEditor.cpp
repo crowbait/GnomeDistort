@@ -136,6 +136,7 @@ DisplayComponent::DisplayComponent(GnomeDistortAudioProcessor& p) : audioProcess
         // or simply audioProcessor.getParameter("LoCutFreq")->addListener(this);
         param->addListener(this);
     }
+    updateChain();
     startTimerHz(60);   // timer for repaint
 }
 DisplayComponent::~DisplayComponent() {
@@ -195,22 +196,25 @@ void DisplayComponent::paint(juce::Graphics& g) {
     g.strokePath(filterResponseCurve, PathStrokeType(2));   // draw path
 }
 
+void DisplayComponent::updateChain() {
+    ChainSettings chainSettings = getChainSettings(audioProcessor.apvts);
+    auto loCoefficients = generateLoCutFilter(chainSettings, audioProcessor.getSampleRate());
+    updateCutFilter(monoChain.get<ChainPositions::LoCut>(), loCoefficients, static_cast<FilterSlope>(chainSettings.LoCutSlope));
+    Coefficients peakCoefficients = generatePeakFilter(chainSettings, audioProcessor.getSampleRate());
+    updateCoefficients(monoChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
+    auto hiCoefficients = generateHiCutFilter(chainSettings, audioProcessor.getSampleRate());
+    updateCutFilter(monoChain.get<ChainPositions::HiCut>(), hiCoefficients, static_cast<FilterSlope>(chainSettings.HiCutSlope));
+
+    repaint();
+}
+
 void DisplayComponent::parameterValueChanged(int parameterIndex, float newValue) {
     parametersChanged.set(true);
 }
 
 void DisplayComponent::timerCallback() {
     if (parametersChanged.compareAndSetBool(false, true)) {
-        // update monochain
-        ChainSettings chainSettings = getChainSettings(audioProcessor.apvts);
-        auto loCoefficients = generateLoCutFilter(chainSettings, audioProcessor.getSampleRate());
-        updateCutFilter(monoChain.get<ChainPositions::LoCut>(), loCoefficients, static_cast<FilterSlope>(chainSettings.LoCutSlope));
-        Coefficients peakCoefficients = generatePeakFilter(chainSettings, audioProcessor.getSampleRate());
-        updateCoefficients(monoChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
-        auto hiCoefficients = generateHiCutFilter(chainSettings, audioProcessor.getSampleRate());
-        updateCutFilter(monoChain.get<ChainPositions::HiCut>(), hiCoefficients, static_cast<FilterSlope>(chainSettings.HiCutSlope));
-
-        repaint();
+        updateChain();
     }
 }
 

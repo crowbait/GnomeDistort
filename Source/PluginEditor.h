@@ -67,6 +67,7 @@ private:
     GnomeDistortAudioProcessor& audioProcessor;
 
     juce::Atomic<bool> parametersChanged{ false };
+    void updateChain();
     MonoChain monoChain;
 };
 
