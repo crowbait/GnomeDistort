@@ -19,9 +19,9 @@ struct LookAndFeelSliderValues : juce::LookAndFeel_V4 {
 };
 
 struct RotarySliderLabeledValues : juce::Slider {
-    RotarySliderLabeledValues(juce::RangedAudioParameter& rangedParam, const bool smallValue, const juce::String& label, const bool showDecimals) :
+    RotarySliderLabeledValues(juce::RangedAudioParameter& rangedParam, const bool smallValue, const juce::String& label, const bool showDecimals, juce::Image& knobOverlay) :
         juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag, juce::Slider::TextEntryBoxPosition::NoTextBox),
-        param(&rangedParam), smallValueText(smallValue), labelText(label), decimals(showDecimals) {
+        param(&rangedParam), smallValueText(smallValue), labelText(label), decimals(showDecimals), overlay(knobOverlay) {
         setLookAndFeel(&LNF);
     }
 
@@ -36,11 +36,10 @@ struct RotarySliderLabeledValues : juce::Slider {
     bool getDecimals() const { return decimals; };
     juce::String getDisplayString() const;
     juce::String getLabelString() const { return labelText; };
-
+    juce::Image& overlay;
 
 private:
     LookAndFeelSliderValues LNF;
-
     juce::RangedAudioParameter* param;
     bool smallValueText;
     bool decimals;
@@ -53,6 +52,10 @@ struct CustomSelect : juce::ComboBox {
     }
 };
 
+// =======================================================
+// =======================================================
+// =======================================================
+
 struct DisplayComponent : juce::Component, juce::AudioProcessorParameter::Listener, juce::Timer {
     DisplayComponent(GnomeDistortAudioProcessor&);
     ~DisplayComponent();
@@ -62,15 +65,20 @@ struct DisplayComponent : juce::Component, juce::AudioProcessorParameter::Listen
     void timerCallback() override;
 
     void paint(juce::Graphics& g) override;
-
+    void resized() override;
 private:
     GnomeDistortAudioProcessor& audioProcessor;
 
     juce::Atomic<bool> parametersChanged{ false };
     void updateChain();
     MonoChain monoChain;
+
+    juce::Image background;
 };
 
+// =======================================================
+// =======================================================
+// =======================================================
 
 class GnomeDistortAudioProcessorEditor : public juce::AudioProcessorEditor {
 public:

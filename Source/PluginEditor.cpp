@@ -25,11 +25,10 @@ void LookAndFeelSliderValues::drawRotarySlider(juce::Graphics& g,
     g.setColour(Colour(110u, 10u, 10u));
     g.fillEllipse(bounds);
 
-    // overlay
-    juce::Image overlay = juce::ImageCache::getFromMemory(BinaryData::knob_overlay_128_png, BinaryData::knob_overlay_128_pngSize);
-    g.drawImage(overlay, bounds, RectanglePlacement::stretchToFit);
-
     if (auto* sldr = dynamic_cast<RotarySliderLabeledValues*>(&slider)) {
+        // overlay
+        g.drawImage(sldr->overlay, bounds, RectanglePlacement::stretchToFit);
+
         bool isSmall = sldr->getIsSmallText();
         int textHeight = sldr->getTextHeight();
 
@@ -64,7 +63,7 @@ void LookAndFeelSliderValues::drawRotarySlider(juce::Graphics& g,
 
         g.setColour(Colours::lightgrey);
         g.drawFittedText(valuetext, valueboxRect.toNearestInt(), Justification::centred, 1);
-    }
+    } else jassertfalse;
 
     // indicator
     Rectangle<float> indicatorRect;
@@ -147,6 +146,10 @@ DisplayComponent::~DisplayComponent() {
     }
 }
 
+void DisplayComponent::resized() {
+
+}
+
 void DisplayComponent::paint(juce::Graphics& g) {
     using namespace juce;
 
@@ -225,16 +228,16 @@ void DisplayComponent::timerCallback() {
 
 GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortAudioProcessor& p)
     : AudioProcessorEditor(&p), audioProcessor(p),
-    LoCutFreqSlider(*audioProcessor.apvts.getParameter("LoCutFreq"), false, "LOW CUT", false), // init sliders
-    PeakFreqSlider(*audioProcessor.apvts.getParameter("PeakFreq"), true, "FREQ", false),
-    PeakGainSlider(*audioProcessor.apvts.getParameter("PeakGain"), true, "GAIN", true),
-    PeakQSlider(*audioProcessor.apvts.getParameter("PeakQ"), true, "Q", true),
-    HiCutFreqSlider(*audioProcessor.apvts.getParameter("HiCutFreq"), false, "HIGH CUT", false),
-    PreGainSlider(*audioProcessor.apvts.getParameter("PreGain"), false, "GAIN", true),
-    BiasSlider(*audioProcessor.apvts.getParameter("Bias"), false, "BIAS", true),
-    WaveShapeAmountSlider(*audioProcessor.apvts.getParameter("WaveShapeAmount"), false, "DIST AMOUNT", true),
-    PostGainSlider(*audioProcessor.apvts.getParameter("PostGain"), false, "GAIN", true),
-    DryWetSlider(*audioProcessor.apvts.getParameter("DryWet"), false, "MIX", true),
+    LoCutFreqSlider(*audioProcessor.apvts.getParameter("LoCutFreq"), false, "LOW CUT", false, knobOverlay), // init sliders
+    PeakFreqSlider(*audioProcessor.apvts.getParameter("PeakFreq"), true, "FREQ", false, knobOverlay),
+    PeakGainSlider(*audioProcessor.apvts.getParameter("PeakGain"), true, "GAIN", true, knobOverlay),
+    PeakQSlider(*audioProcessor.apvts.getParameter("PeakQ"), true, "Q", true, knobOverlay),
+    HiCutFreqSlider(*audioProcessor.apvts.getParameter("HiCutFreq"), false, "HIGH CUT", false, knobOverlay),
+    PreGainSlider(*audioProcessor.apvts.getParameter("PreGain"), false, "GAIN", true, knobOverlay),
+    BiasSlider(*audioProcessor.apvts.getParameter("Bias"), false, "BIAS", true, knobOverlay),
+    WaveShapeAmountSlider(*audioProcessor.apvts.getParameter("WaveShapeAmount"), false, "DIST AMOUNT", true, knobOverlay),
+    PostGainSlider(*audioProcessor.apvts.getParameter("PostGain"), false, "GAIN", true, knobOverlay),
+    DryWetSlider(*audioProcessor.apvts.getParameter("DryWet"), false, "MIX", true, knobOverlay),
 
     displayComp(audioProcessor),    // init display
 
@@ -262,6 +265,8 @@ GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortA
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
+
+    knobOverlay = juce::ImageCache::getFromMemory(BinaryData::knob_overlay_128_png, BinaryData::knob_overlay_128_pngSize);
 
     for (auto* comp : getComponents()) {
         addAndMakeVisible(comp);
