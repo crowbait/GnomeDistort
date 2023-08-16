@@ -230,15 +230,15 @@ void DisplayComponent::timerCallback() {
 
 GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortAudioProcessor& p)
     : AudioProcessorEditor(&p), audioProcessor(p),
-    LoCutFreqSlider(*audioProcessor.apvts.getParameter("LoCutFreq"), "Hz", false, "LOW CUT"), // init sliders
-    PeakFreqSlider(*audioProcessor.apvts.getParameter("PeakFreq"), "Hz", true, "FREQ"),
-    PeakGainSlider(*audioProcessor.apvts.getParameter("PeakGain"), "", true, "GAIN"),
-    PeakQSlider(*audioProcessor.apvts.getParameter("PeakQ"), "", true, "Q"),
-    HiCutFreqSlider(*audioProcessor.apvts.getParameter("HiCutFreq"), "Hz", false, "HIGH CUT"),
-    PreGainSlider(*audioProcessor.apvts.getParameter("PreGain"), "", false, "GAIN"),
-    BiasSlider(*audioProcessor.apvts.getParameter("Bias"), "", false, "BIAS"),
-    WaveShapeAmountSlider(*audioProcessor.apvts.getParameter("WaveShap"), "", false, "DIST AMOUNT"),
-    PostGainSlider(*audioProcessor.apvts.getParameter("PostGain"), "", false, "GAIN"),
+    LoCutFreqSlider(*audioProcessor.apvts.getParameter("LoCutFreq"), false, "LOW CUT"), // init sliders
+    PeakFreqSlider(*audioProcessor.apvts.getParameter("PeakFreq"), true, "FREQ"),
+    PeakGainSlider(*audioProcessor.apvts.getParameter("PeakGain"), true, "GAIN"),
+    PeakQSlider(*audioProcessor.apvts.getParameter("PeakQ"), true, "Q"),
+    HiCutFreqSlider(*audioProcessor.apvts.getParameter("HiCutFreq"), false, "HIGH CUT"),
+    PreGainSlider(*audioProcessor.apvts.getParameter("PreGain"), false, "GAIN"),
+    BiasSlider(*audioProcessor.apvts.getParameter("Bias"), false, "BIAS"),
+    WaveShapeAmountSlider(*audioProcessor.apvts.getParameter("WaveShapeAmount"), false, "DIST AMOUNT"),
+    PostGainSlider(*audioProcessor.apvts.getParameter("PostGain"), false, "GAIN"),
 
     displayComp(audioProcessor),    // init display
 

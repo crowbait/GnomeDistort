@@ -19,9 +19,9 @@ struct LookAndFeelSliderValues : juce::LookAndFeel_V4 {
 };
 
 struct RotarySliderLabeledValues : juce::Slider {
-    RotarySliderLabeledValues(juce::RangedAudioParameter& rangedParam, const juce::String& suffix, const bool smallValue, const juce::String& label) :
+    RotarySliderLabeledValues(juce::RangedAudioParameter& rangedParam, const bool smallValue, const juce::String& label) :
         juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag, juce::Slider::TextEntryBoxPosition::NoTextBox),
-        param(&rangedParam), unitSuffix(suffix), smallValueText(smallValue), labelText(label) {
+        param(&rangedParam),, smallValueText(smallValue), labelText(label) {
         setLookAndFeel(&LNF);
     }
 
@@ -40,7 +40,6 @@ private:
     LookAndFeelSliderValues LNF;
 
     juce::RangedAudioParameter* param;
-    juce::String unitSuffix;
     bool smallValueText;
     juce::String labelText;
 };
