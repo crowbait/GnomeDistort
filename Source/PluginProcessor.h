@@ -130,8 +130,7 @@ public:
     static juce::StringArray getWaveshaperOptions();
 
     using BlockType = juce::AudioBuffer<float>;
-    SingleChannelSampleFifo<BlockType> leftPreProcessingFifo{ Channel::Left };
-    SingleChannelSampleFifo<BlockType> leftPostProcessingFifo{ Channel::Left };
+    SingleChannelSampleFifo<BlockType> leftPreProcessingFifo{ Channel::Left }, leftPostProcessingFifo{ Channel::Left };
 
 private:
     MonoChain leftChain, rightChain;    // stereo

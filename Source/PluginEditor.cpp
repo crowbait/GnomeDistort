@@ -255,7 +255,6 @@ void DisplayComponent::paint(juce::Graphics& g) {
     // draw signals
     g.setColour(COLOR_KNOB);
     postFFTPath.applyTransform(AffineTransform().translation(analysisArea.getX(), analysisArea.getY()));
-    //g.fillPath(postFFTPath);
     g.strokePath(postFFTPath, PathStrokeType(2.f));
     g.setColour(COLOR_BG_MID);
     preFFTPath.applyTransform(AffineTransform().translation(analysisArea.getX(), analysisArea.getY()));
@@ -324,55 +323,40 @@ void DisplayComponent::parameterValueChanged(int parameterIndex, float newValue)
     parametersChanged.set(true);
 }
 
-void DisplayComponent::timerCallback() {
+void DisplayComponent::generatePathFromIncomingAudio(SingleChannelSampleFifo<GnomeDistortAudioProcessor::BlockType>* fifo, juce::AudioBuffer<float>* buffer, FFTDataGenerator<std::vector<float>>* FFTGen,
+                                   AnalyzerPathGenerator<juce::Path>* pathProducer, juce::Path* path, bool closedPath) {
     const float negInfinity = -48.f;
     juce::AudioBuffer<float> tempIncomingBuffer;
-    while (leftPreFifo->getNumCompletedBuffersAvailable() > 0) {
-        if (leftPreFifo->getAudioBuffer(tempIncomingBuffer)) {  // read temp buffer, push into pre-processing buffer
+    while (fifo->getNumCompletedBuffersAvailable() > 0) {
+        if (fifo->getAudioBuffer(tempIncomingBuffer)) {  // read temp buffer, push into pre-processing buffer
             int size = tempIncomingBuffer.getNumSamples();
-            juce::FloatVectorOperations::copy(preBuffer.getWritePointer(0, 0), preBuffer.getReadPointer(0, size), preBuffer.getNumSamples() - size);
-            juce::FloatVectorOperations::copy(preBuffer.getWritePointer(0, preBuffer.getNumSamples() - size), tempIncomingBuffer.getReadPointer(0, 0), size);
-            preFFTDataGenerator.produceFFTData(preBuffer, negInfinity);
+            juce::FloatVectorOperations::copy(buffer->getWritePointer(0, 0), buffer->getReadPointer(0, size), buffer->getNumSamples() - size);
+            juce::FloatVectorOperations::copy(buffer->getWritePointer(0, buffer->getNumSamples() - size), tempIncomingBuffer.getReadPointer(0, 0), size);
+            FFTGen->produceFFTData(*buffer, negInfinity);
         }
     }
     const auto fftBounds = getAnalysisArea().toFloat();
-    const int fftSize = preFFTDataGenerator.getFFTSize();
+    const int fftSize = FFTGen->getFFTSize();
     const float binWidth = audioProcessor.getSampleRate() / (double)fftSize;
 
-    while (preFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0) {    // generate paths from FFT data
+    while (FFTGen->getNumAvailableFFTDataBlocks() > 0) {    // generate paths from FFT data
         std::vector<float> fftData;
-        if (preFFTDataGenerator.getFFTData(fftData)) {
-            prePathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, negInfinity, false);
+        if (FFTGen->getFFTData(fftData)) {
+            pathProducer->generatePath(fftData, fftBounds, fftSize, binWidth, negInfinity, closedPath);
         }
     }
 
-    tempIncomingBuffer.clear();
-    while (leftPostFifo->getNumCompletedBuffersAvailable() > 0) {
-        if (leftPostFifo->getAudioBuffer(tempIncomingBuffer)) {  // read temp buffer, push into post-processing buffer
-            int size = tempIncomingBuffer.getNumSamples();
-            juce::FloatVectorOperations::copy(postBuffer.getWritePointer(0, 0), postBuffer.getReadPointer(0, size), postBuffer.getNumSamples() - size);
-            juce::FloatVectorOperations::copy(postBuffer.getWritePointer(0, postBuffer.getNumSamples() - size), tempIncomingBuffer.getReadPointer(0, 0), size);
-            postFFTDataGenerator.produceFFTData(postBuffer, negInfinity);
-        }
+    while (pathProducer->getNumPathsAvailable() > 0) {    // pull paths as long as there are any, draw the most recent one
+        pathProducer->getPath(*path);
     }
-    while (postFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0) {    // generate paths from FFT data
-        std::vector<float> fftData;
-        if (postFFTDataGenerator.getFFTData(fftData)) {
-            postPathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, negInfinity, false);
-        }
-    }
+}
 
-    while (prePathProducer.getNumPathsAvailable() > 0) {    // pull paths as long as there are any, draw the most recent one
-        prePathProducer.getPath(preFFTPath);
-    }
-    while (postPathProducer.getNumPathsAvailable() > 0) {
-        postPathProducer.getPath(postFFTPath);
-    }
-
+void DisplayComponent::timerCallback() {
+    generatePathFromIncomingAudio(leftPreFifo, &preBuffer, &preFFTDataGenerator, &prePathProducer, &preFFTPath, false);
+    generatePathFromIncomingAudio(leftPostFifo, &postBuffer, &postFFTDataGenerator, &postPathProducer, &postFFTPath, false);
     if (parametersChanged.compareAndSetBool(false, true)) {
         updateSettings();
     }
-
     repaint(); // repaint not only on param changes, because of paths
 }
 

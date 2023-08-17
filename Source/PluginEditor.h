@@ -87,16 +87,17 @@ private:
     juce::Rectangle<int> getAnalysisArea();
     int gridFontHeight = 8;
 
+    void generatePathFromIncomingAudio(SingleChannelSampleFifo<GnomeDistortAudioProcessor::BlockType>* fifo,
+                                       juce::AudioBuffer<float>* buffer,
+                                       FFTDataGenerator<std::vector<float>>* FFTGen,
+                                       AnalyzerPathGenerator<juce::Path>* pathProducer,
+                                       juce::Path* path, bool closedPath);
     SingleChannelSampleFifo<GnomeDistortAudioProcessor::BlockType>* leftPreFifo;
     SingleChannelSampleFifo<GnomeDistortAudioProcessor::BlockType>* leftPostFifo;
-    juce::AudioBuffer<float> preBuffer;
-    juce::AudioBuffer<float> postBuffer;
-    FFTDataGenerator<std::vector<float>> preFFTDataGenerator;
-    FFTDataGenerator<std::vector<float>> postFFTDataGenerator;
-    AnalyzerPathGenerator<juce::Path> prePathProducer;
-    AnalyzerPathGenerator<juce::Path> postPathProducer;
-    juce::Path preFFTPath;
-    juce::Path postFFTPath;
+    juce::AudioBuffer<float> preBuffer, postBuffer;
+    FFTDataGenerator<std::vector<float>> preFFTDataGenerator, postFFTDataGenerator;
+    AnalyzerPathGenerator<juce::Path> prePathProducer, postPathProducer;
+    juce::Path preFFTPath, postFFTPath;
 };
 
 // =======================================================
