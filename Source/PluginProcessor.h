@@ -23,7 +23,8 @@ enum WaveShaperFunction {
     SoftClip,
     Cracked,
     Jericho,
-    Warm
+    Warm,
+    Quantize
 };
 
 struct ChainSettings {

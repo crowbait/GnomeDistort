@@ -104,7 +104,8 @@ juce::StringArray GnomeDistortAudioProcessor::getWaveshaperOptions() {
         "SoftClip",
         "Cracked",
         "Jericho",
-        "Warm"
+        "Warm",
+        "Quantize"
     };
 }
 std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, float& amount) {
@@ -126,6 +127,12 @@ std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, floa
                 if (x <= 0) return juce::jlimit(-1.f, 1.f, x * (1.f - amount));
                 return juce::jlimit(-1.f, 1.f, x * (1.f + amount));
                 }; break;
+        case Quantize:
+            int numSteps = 1 + std::floor((1 / (amount + 0.01f))*2);
+            return [numSteps](float x) {
+                int quant = (std::min(numSteps, (int)(std::abs(x * numSteps))));
+                return (float)(x < 0 ? (0 - ((1.f / numSteps) * quant)) : ((1.f / numSteps) * quant));
+            }; break;
     }
 }
 
