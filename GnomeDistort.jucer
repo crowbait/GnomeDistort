@@ -10,6 +10,11 @@
               pluginAAXCategory="8192">
   <MAINGROUP id="zxk1Cm" name="GnomeDistort">
     <GROUP id="{F0736FEA-2D8E-9919-CABB-D0BD47D99A96}" name="Resources">
+      <FILE id="g2w5RO" name="grundge_overlay.png" compile="0" resource="1"
+            file="Assets/grundge_overlay.png"/>
+      <FILE id="PE88ts" name="logo_distort.png" compile="0" resource="1"
+            file="Assets/logo_distort.png"/>
+      <FILE id="XWN5J7" name="logo_gnome.png" compile="0" resource="1" file="Assets/logo_gnome.png"/>
       <FILE id="ESdRia" name="knob_overlay_128.png" compile="0" resource="1"
             file="Assets/knob_overlay_128.png"/>
     </GROUP>

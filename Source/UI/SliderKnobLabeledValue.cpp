@@ -103,6 +103,7 @@ void SliderKnobLabeledValues::paint(juce::Graphics& g) {
         *this
     );
 }
+
 juce::Rectangle<int> SliderKnobLabeledValues::getSliderBounds(juce::Rectangle<int>& bounds) const {
     auto size = juce::jmin(bounds.getWidth() - 12, bounds.getHeight() - 12);
     juce::Rectangle<int> r;
@@ -111,6 +112,7 @@ juce::Rectangle<int> SliderKnobLabeledValues::getSliderBounds(juce::Rectangle<in
     r.setCentre(bounds.getCentreX(), bounds.getCentreY());
     return r;
 }
+
 juce::String SliderKnobLabeledValues::getDisplayString() const {
     juce::String str;
     return juce::String((float)getValue(), getDecimals() ? 2 : 0);

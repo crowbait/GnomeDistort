@@ -24,6 +24,25 @@ struct CustomSelect : juce::ComboBox {
 // =======================================================
 // =======================================================
 
+enum compIndex {
+    LoCutFreqSlider,
+    PeakFreqSlider,
+    PeakGainSlider,
+    PeakQSlider,
+    HiCutFreqSlider,
+    PreGainSlider,
+    BiasSlider,
+    WaveShapeAmountSlider,
+    PostGainSlider,
+    DryWetSlider,
+
+    LoCutSlopeSelect,
+    HiCutSlopeSelect,
+    WaveshapeSelect,
+
+    displayComp
+};
+
 class GnomeDistortAudioProcessorEditor : public juce::AudioProcessorEditor {
 public:
     GnomeDistortAudioProcessorEditor(GnomeDistortAudioProcessor&);
@@ -51,6 +70,8 @@ private:
 
     std::vector<juce::Component*> getComponents();
 
+    void paintBackground();
+    juce::Image background;
     juce::Image knobOverlay;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GnomeDistortAudioProcessorEditor)
