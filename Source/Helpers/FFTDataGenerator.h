@@ -60,3 +60,49 @@ private:
     std::unique_ptr<juce::dsp::WindowingFunction<float>> window;
     Fifo<BlockType> fftDataFifo;
 };
+
+
+
+template<typename PathType>
+struct AnalyzerPathGenerator {
+    void generatePath(const std::vector<float>& renderData, juce::Rectangle<float> fftBounds, int fftSize, float binWidth, float negativeInfinity, bool closedPath) {
+        float top = fftBounds.getY();
+        float bottom = fftBounds.getHeight();
+        float width = fftBounds.getWidth();
+        int numBins = (int)fftSize / 2;
+
+        PathType p;
+        p.preallocateSpace(3 * (int)width);
+
+        auto map = [bottom, top, negativeInfinity](float v) {
+            return juce::jmap(v, negativeInfinity, 0.f, (float)bottom, top);
+        };
+        float y = map(renderData[0]);
+        p.startNewSubPath(0, y);
+
+        const int pathResolution = 2;
+        for (int bin = 1; bin < numBins; bin++) {
+            y = map(renderData[bin]);
+            if (!std::isnan(y) && !std::isinf(y) && y <= bottom) {
+                float binFreq = bin * binWidth;
+                auto normalizedBinX = juce::mapFromLog10(binFreq, 20.f, 20000.f);
+                float x = normalizedBinX * width;
+                if(x >= 0 && x <= width) p.lineTo(std::floor(x), y);
+            }
+        }
+
+        if (closedPath) {
+            p.lineTo(width, bottom);
+            p.lineTo(0, bottom);
+            p.closeSubPath();
+        }
+
+        pathFifo.push(p);
+    }
+
+    int getNumPathsAvailable() const { return pathFifo.getNumAvailableForReading(); }
+    bool getPath(PathType& path) { return pathFifo.pull(path); }
+
+private:
+    Fifo<PathType> pathFifo;
+};

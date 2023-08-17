@@ -79,7 +79,7 @@ private:
     GnomeDistortAudioProcessor& audioProcessor;
 
     juce::Atomic<bool> parametersChanged{ false };
-    void updateChain();
+    void updateSettings();
     MonoChain monoChain;
 
     juce::Image background;
@@ -93,6 +93,10 @@ private:
     juce::AudioBuffer<float> postBuffer;
     FFTDataGenerator<std::vector<float>> preFFTDataGenerator;
     FFTDataGenerator<std::vector<float>> postFFTDataGenerator;
+    AnalyzerPathGenerator<juce::Path> prePathProducer;
+    AnalyzerPathGenerator<juce::Path> postPathProducer;
+    juce::Path preFFTPath;
+    juce::Path postFFTPath;
 };
 
 // =======================================================

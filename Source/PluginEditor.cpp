@@ -148,8 +148,8 @@ leftPreFifo(&audioProcessor.leftPreProcessingFifo), leftPostFifo(&audioProcessor
     preBuffer.setSize(1, preFFTDataGenerator.getFFTSize());
     postBuffer.setSize(1, postFFTDataGenerator.getFFTSize());
 
-    updateChain();
-    startTimerHz(60);   // timer for repaint
+    updateSettings();
+    startTimerHz(50);   // timer for repaint
 }
 DisplayComponent::~DisplayComponent() {
     const auto& params = audioProcessor.getParameters();
@@ -244,18 +244,26 @@ void DisplayComponent::paint(juce::Graphics& g) {
     auto renderArea = getRenderArea();
     auto analysisArea = getAnalysisArea();
 
-    const int width = renderArea.getWidth();
-    const double outputMin = renderArea.getBottom();
-    const double outputMax = renderArea.getY();
+    const int width = analysisArea.getWidth();
+    const double outputMin = analysisArea.getBottom();
+    const double outputMax = analysisArea.getY();
 
     g.setColour(COLOR_BG_VERYDARK);
     g.fillRect(displayArea.toFloat());
     g.drawImage(background, displayArea.toFloat());
 
+    // draw signals
+    g.setColour(COLOR_KNOB);
+    postFFTPath.applyTransform(AffineTransform().translation(analysisArea.getX(), analysisArea.getY()));
+    //g.fillPath(postFFTPath);
+    g.strokePath(postFFTPath, PathStrokeType(2.f));
+    g.setColour(COLOR_BG_MID);
+    preFFTPath.applyTransform(AffineTransform().translation(analysisArea.getX(), analysisArea.getY()));
+    g.strokePath(preFFTPath, PathStrokeType(2.f));
+
     auto& loCut = monoChain.get<ChainPositions::LoCut>();
     auto& peak = monoChain.get<ChainPositions::Peak>();
     auto& hiCut = monoChain.get<ChainPositions::HiCut>();
-    auto& postWaveshaper = monoChain.get<ChainPositions::WaveshaperMakeupGain>();
     auto sampleRate = audioProcessor.getSampleRate();
 
     // get filter magnitudes
@@ -302,7 +310,7 @@ juce::Rectangle<int> DisplayComponent::getAnalysisArea() {
     return bounds;
 }
 
-void DisplayComponent::updateChain() {
+void DisplayComponent::updateSettings() {
     ChainSettings chainSettings = getChainSettings(audioProcessor.apvts);
     auto loCoefficients = generateLoCutFilter(chainSettings, audioProcessor.getSampleRate());
     updateCutFilter(monoChain.get<ChainPositions::LoCut>(), loCoefficients, static_cast<FilterSlope>(chainSettings.LoCutSlope));
@@ -317,29 +325,55 @@ void DisplayComponent::parameterValueChanged(int parameterIndex, float newValue)
 }
 
 void DisplayComponent::timerCallback() {
+    const float negInfinity = -48.f;
     juce::AudioBuffer<float> tempIncomingBuffer;
     while (leftPreFifo->getNumCompletedBuffersAvailable() > 0) {
         if (leftPreFifo->getAudioBuffer(tempIncomingBuffer)) {  // read temp buffer, push into pre-processing buffer
             int size = tempIncomingBuffer.getNumSamples();
             juce::FloatVectorOperations::copy(preBuffer.getWritePointer(0, 0), preBuffer.getReadPointer(0, size), preBuffer.getNumSamples() - size);
             juce::FloatVectorOperations::copy(preBuffer.getWritePointer(0, preBuffer.getNumSamples() - size), tempIncomingBuffer.getReadPointer(0, 0), size);
-            preFFTDataGenerator.produceFFTData(preBuffer, -48.f);
+            preFFTDataGenerator.produceFFTData(preBuffer, negInfinity);
         }
     }
+    const auto fftBounds = getAnalysisArea().toFloat();
+    const int fftSize = preFFTDataGenerator.getFFTSize();
+    const float binWidth = audioProcessor.getSampleRate() / (double)fftSize;
+
+    while (preFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0) {    // generate paths from FFT data
+        std::vector<float> fftData;
+        if (preFFTDataGenerator.getFFTData(fftData)) {
+            prePathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, negInfinity, false);
+        }
+    }
+
     tempIncomingBuffer.clear();
     while (leftPostFifo->getNumCompletedBuffersAvailable() > 0) {
         if (leftPostFifo->getAudioBuffer(tempIncomingBuffer)) {  // read temp buffer, push into post-processing buffer
             int size = tempIncomingBuffer.getNumSamples();
             juce::FloatVectorOperations::copy(postBuffer.getWritePointer(0, 0), postBuffer.getReadPointer(0, size), postBuffer.getNumSamples() - size);
             juce::FloatVectorOperations::copy(postBuffer.getWritePointer(0, postBuffer.getNumSamples() - size), tempIncomingBuffer.getReadPointer(0, 0), size);
-            postFFTDataGenerator.produceFFTData(postBuffer, -48.f);
+            postFFTDataGenerator.produceFFTData(postBuffer, negInfinity);
+        }
+    }
+    while (postFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0) {    // generate paths from FFT data
+        std::vector<float> fftData;
+        if (postFFTDataGenerator.getFFTData(fftData)) {
+            postPathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, negInfinity, false);
         }
     }
 
-    if (parametersChanged.compareAndSetBool(false, true)) {
-        updateChain();
-        repaint();
+    while (prePathProducer.getNumPathsAvailable() > 0) {    // pull paths as long as there are any, draw the most recent one
+        prePathProducer.getPath(preFFTPath);
     }
+    while (postPathProducer.getNumPathsAvailable() > 0) {
+        postPathProducer.getPath(postFFTPath);
+    }
+
+    if (parametersChanged.compareAndSetBool(false, true)) {
+        updateSettings();
+    }
+
+    repaint(); // repaint not only on param changes, because of paths
 }
 
 
