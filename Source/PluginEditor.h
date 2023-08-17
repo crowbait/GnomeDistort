@@ -12,41 +12,7 @@
 #include "PluginProcessor.h"
 #include "Helpers/FFTDataGenerator.h"
 #include "UI/Colors.h"
-
-struct LookAndFeelSliderValues : juce::LookAndFeel_V4 {
-    void drawRotarySlider(juce::Graphics& g,
-                          int x, int y, int width, int height,
-                          float sliderPosProportional,
-                          float rotaryStartAngle, float rotaryEndAngle, juce::Slider&);
-};
-
-struct RotarySliderLabeledValues : juce::Slider {
-    RotarySliderLabeledValues(juce::RangedAudioParameter& rangedParam, const bool smallValue, const juce::String& label, const bool showDecimals, juce::Image& knobOverlay) :
-        juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag, juce::Slider::TextEntryBoxPosition::NoTextBox),
-        param(&rangedParam), smallValueText(smallValue), labelText(label), decimals(showDecimals), overlay(knobOverlay) {
-        setLookAndFeel(&LNF);
-    }
-
-    ~RotarySliderLabeledValues() {
-        setLookAndFeel(nullptr);
-    }
-
-    void paint(juce::Graphics& g) override;
-    juce::Rectangle<int> getSliderBounds(juce::Rectangle<int>& bounds) const;
-    int getTextHeight() const { if (getIsSmallText()) return 8; return 12; }
-    bool getIsSmallText() const { return smallValueText; };
-    bool getDecimals() const { return decimals; };
-    juce::String getDisplayString() const;
-    juce::String getLabelString() const { return labelText; };
-    juce::Image& overlay;
-
-private:
-    LookAndFeelSliderValues LNF;
-    juce::RangedAudioParameter* param;
-    bool smallValueText;
-    bool decimals;
-    juce::String labelText;
-};
+#include "UI/SliderKnobLabeledValue.h"
 
 struct CustomSelect : juce::ComboBox {
     CustomSelect() : juce::ComboBox() {
@@ -111,7 +77,7 @@ private:
     // access the processor object that created it.
     GnomeDistortAudioProcessor& audioProcessor;
 
-    RotarySliderLabeledValues LoCutFreqSlider, PeakFreqSlider, PeakGainSlider, PeakQSlider, HiCutFreqSlider, PreGainSlider, BiasSlider, WaveShapeAmountSlider, PostGainSlider, DryWetSlider;
+    SliderKnobLabeledValues LoCutFreqSlider, PeakFreqSlider, PeakGainSlider, PeakQSlider, HiCutFreqSlider, PreGainSlider, BiasSlider, WaveShapeAmountSlider, PostGainSlider, DryWetSlider;
     CustomSelect LoCutSlopeSelect, HiCutSlopeSelect, WaveshapeSelect;
     DisplayComponent displayComp;
 
