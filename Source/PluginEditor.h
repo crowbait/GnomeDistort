@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "Helpers/FFTDataGenerator.h"
 
 inline juce::Colour COLOR_BG = juce::Colour(50u, 50u, 50u);
 inline juce::Colour COLOR_BG_VERYDARK = juce::Colour(18u, 18u, 18u);
@@ -85,6 +86,13 @@ private:
     juce::Rectangle<int> getRenderArea();
     juce::Rectangle<int> getAnalysisArea();
     int gridFontHeight = 8;
+
+    SingleChannelSampleFifo<GnomeDistortAudioProcessor::BlockType>* leftPreFifo;
+    SingleChannelSampleFifo<GnomeDistortAudioProcessor::BlockType>* leftPostFifo;
+    juce::AudioBuffer<float> preBuffer;
+    juce::AudioBuffer<float> postBuffer;
+    FFTDataGenerator<std::vector<float>> preFFTDataGenerator;
+    FFTDataGenerator<std::vector<float>> postFFTDataGenerator;
 };
 
 // =======================================================

@@ -9,7 +9,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "SingleChannelSampleFifo.h"
+#include "Helpers/SingleChannelSampleFifo.h"
 
 enum FilterSlope {
     Slope12,

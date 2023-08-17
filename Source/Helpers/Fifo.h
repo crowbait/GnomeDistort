@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <array>
+
 enum Channel {
     Left,
     Right
@@ -24,10 +26,17 @@ struct Fifo {
         }
     }
 
+    void prepare(size_t numElements) {
+        for (auto& buffer : buffers) {
+            buffer.clear();
+            buffer.resize(numElements, 0);
+        }
+    }
+
     bool push(const T& t) {
         auto write = fifo.write(1);
-        if (write.blockSize > 0) {
-            buffers[write.startIndex1] = 1;
+        if (write.blockSize1 > 0) {
+            buffers[write.startIndex1] = t;
             return true;
         }
         return false;

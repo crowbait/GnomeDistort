@@ -42,7 +42,7 @@ struct SingleChannelSampleFifo {
     int getNumCompletedBuffersAvailable() const { return audioBufferFifo.getNumAvailableForReading(); }
     bool isPrepared() const { return prepared.get(); }
     int getSize() const { return size.get() }
-    bool getAudioBuffer(BlockType& buf) { return audioBuffer.pull(buf); }
+    bool getAudioBuffer(BlockType& buf) { return audioBufferFifo.pull(buf); }
 
 private:
     Channel channelToUse;
@@ -54,7 +54,7 @@ private:
 
     void pushNextSample(float sample) {
         if (fifoIndex == bufferToFill.getNumSamples()) {
-            auto ok = audioBuffer.push(bufferToFill);
+            auto ok = audioBufferFifo.push(bufferToFill);
             juce::ignoreUnused(ok);
             fifoIndex = 0;
         }

@@ -122,13 +122,32 @@ juce::String RotarySliderLabeledValues::getDisplayString() const {
 //==============================================================================
 
 
-DisplayComponent::DisplayComponent(GnomeDistortAudioProcessor& p) : audioProcessor(p) {
+DisplayComponent::DisplayComponent(GnomeDistortAudioProcessor& p) : audioProcessor(p),
+leftPreFifo(&audioProcessor.leftPreProcessingFifo), leftPostFifo(&audioProcessor.leftPostProcessingFifo) {
+    std::vector<juce::String> paramsToLink{
+        "LoCutFreq",
+        "LoCutSlope",
+        "PeakFreq",
+        "PeakGain",
+        "PeakQ",
+        "HiCutFreq",
+        "HiCutSlope"
+    };
+
     const auto& params = audioProcessor.getParameters();    // register as listener to reflect parameter changes in UI
     for (auto param : params) {
         // if (param->getName(64) == "LoCutFreq") param->addListener(this);
-        // or simply audioProcessor.getParameter("LoCutFreq")->addListener(this);
-        param->addListener(this);
+        // param->addListener(this);
+        if (std::find(paramsToLink.begin(), paramsToLink.end(), param->getName(64)) != paramsToLink.end()) {
+            param->addListener(this);
+        }
     }
+
+    preFFTDataGenerator.changeOrder(FFTOrder::order4096);
+    postFFTDataGenerator.changeOrder(FFTOrder::order8192);
+    preBuffer.setSize(1, preFFTDataGenerator.getFFTSize());
+    postBuffer.setSize(1, postFFTDataGenerator.getFFTSize());
+
     updateChain();
     startTimerHz(60);   // timer for repaint
 }
@@ -188,7 +207,7 @@ void DisplayComponent::resized() {
 
         Rectangle<int> r;
         r.setSize(g.getCurrentFont().getStringWidth(str), gridFontHeight);
-        r.setCentre(x-4, 0);
+        r.setCentre(x - 4, 0);
         r.setY(1);
         g.drawFittedText(str, r, Justification::centred, 1);
     }
@@ -213,6 +232,9 @@ void DisplayComponent::resized() {
         r.setX(2);
         g.drawFittedText(str, r, Justification::centred, 1);
     }
+
+    g.setColour(COLOR_KNOB);
+    g.drawRoundedRectangle(bounds.toFloat(), 2.f, 1.f);
 }
 
 void DisplayComponent::paint(juce::Graphics& g) {
@@ -261,8 +283,8 @@ void DisplayComponent::paint(juce::Graphics& g) {
     for (int i = 1; i < magnitudes.size(); i++) {   // set path for every pixel
         filterResponseCurve.lineTo(analysisArea.getX() + i, map(magnitudes[i]));
     }
-    g.setColour(Colours::yellow);
-    g.strokePath(filterResponseCurve, PathStrokeType(3));   // draw path
+    g.setColour(Colours::white);
+    g.strokePath(filterResponseCurve, PathStrokeType(2));   // draw path
 }
 
 juce::Rectangle<int> DisplayComponent::getRenderArea() {
@@ -295,6 +317,25 @@ void DisplayComponent::parameterValueChanged(int parameterIndex, float newValue)
 }
 
 void DisplayComponent::timerCallback() {
+    juce::AudioBuffer<float> tempIncomingBuffer;
+    while (leftPreFifo->getNumCompletedBuffersAvailable() > 0) {
+        if (leftPreFifo->getAudioBuffer(tempIncomingBuffer)) {  // read temp buffer, push into pre-processing buffer
+            int size = tempIncomingBuffer.getNumSamples();
+            juce::FloatVectorOperations::copy(preBuffer.getWritePointer(0, 0), preBuffer.getReadPointer(0, size), preBuffer.getNumSamples() - size);
+            juce::FloatVectorOperations::copy(preBuffer.getWritePointer(0, preBuffer.getNumSamples() - size), tempIncomingBuffer.getReadPointer(0, 0), size);
+            preFFTDataGenerator.produceFFTData(preBuffer, -48.f);
+        }
+    }
+    tempIncomingBuffer.clear();
+    while (leftPostFifo->getNumCompletedBuffersAvailable() > 0) {
+        if (leftPostFifo->getAudioBuffer(tempIncomingBuffer)) {  // read temp buffer, push into post-processing buffer
+            int size = tempIncomingBuffer.getNumSamples();
+            juce::FloatVectorOperations::copy(postBuffer.getWritePointer(0, 0), postBuffer.getReadPointer(0, size), postBuffer.getNumSamples() - size);
+            juce::FloatVectorOperations::copy(postBuffer.getWritePointer(0, postBuffer.getNumSamples() - size), tempIncomingBuffer.getReadPointer(0, 0), size);
+            postFFTDataGenerator.produceFFTData(postBuffer, -48.f);
+        }
+    }
+
     if (parametersChanged.compareAndSetBool(false, true)) {
         updateChain();
         repaint();

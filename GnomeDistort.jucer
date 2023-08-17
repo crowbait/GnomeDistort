@@ -12,12 +12,15 @@
     <GROUP id="{F0736FEA-2D8E-9919-CABB-D0BD47D99A96}" name="Resources">
       <FILE id="ESdRia" name="knob_overlay_128.png" compile="0" resource="1"
             file="Assets/knob_overlay_128.png"/>
-      <FILE id="dvdtOQ" name="bg.png" compile="0" resource="1" file="Source/Resources/bg.png"/>
     </GROUP>
     <GROUP id="{90ED5E9F-AA5E-20A2-C944-3AE53E8FFA07}" name="Source">
-      <FILE id="QcGh7u" name="Fifo.h" compile="0" resource="0" file="Source/Fifo.h"/>
-      <FILE id="OhJb9p" name="SingleChannelSampleFifo.h" compile="0" resource="0"
-            file="Source/SingleChannelSampleFifo.h"/>
+      <GROUP id="{89CC919F-99F2-E3DB-2352-BE2F017CBBA1}" name="Helpers">
+        <FILE id="ycxTy3" name="FFTDataGenerator.h" compile="0" resource="0"
+              file="Source/Helpers/FFTDataGenerator.h"/>
+        <FILE id="pQ8FPA" name="Fifo.h" compile="0" resource="0" file="Source/Helpers/Fifo.h"/>
+        <FILE id="Sk8mu9" name="SingleChannelSampleFifo.h" compile="0" resource="0"
+              file="Source/Helpers/SingleChannelSampleFifo.h"/>
+      </GROUP>
       <FILE id="NCHjNI" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="nkEfmZ" name="PluginProcessor.h" compile="0" resource="0"
