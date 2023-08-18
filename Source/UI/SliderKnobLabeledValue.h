@@ -11,13 +11,13 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "Colors.h"
+#include "GlobalConsts.h"
 
 struct LookAndFeelSliderLabeledValues : juce::LookAndFeel_V4 {
     void drawRotarySlider(juce::Graphics& g,
                           int x, int y, int width, int height,
                           float sliderPosProportional,
-                          float rotaryStartAngle, float rotaryEndAngle, juce::Slider&);
+                          float rotaryStartAngle, float rotaryEndAngle, juce::Slider&) override;
 };
 
 struct SliderKnobLabeledValues : juce::Slider {
@@ -33,7 +33,7 @@ struct SliderKnobLabeledValues : juce::Slider {
 
     void paint(juce::Graphics& g) override;
     juce::Rectangle<int> getSliderBounds(juce::Rectangle<int>& bounds) const;
-    int getTextHeight() const { if (getIsSmallText()) return 8; return 12; }
+    int getTextHeight() const { if (getIsSmallText()) return TEXT_SMALL; return TEXT_NORMAL; }
     bool getIsSmallText() const { return smallValueText; };
     bool getDecimals() const { return decimals; };
     juce::String getDisplayString() const;

@@ -13,7 +13,7 @@
 #include <JuceHeader.h>
 #include "../PluginProcessor.h"
 #include "../Helpers/FFTDataGenerator.h"
-#include "Colors.h"
+#include "GlobalConsts.h"
 
 struct DisplayComponent : juce::Component, juce::AudioProcessorParameter::Listener, juce::Timer {
     DisplayComponent(GnomeDistortAudioProcessor&);
@@ -21,14 +21,18 @@ struct DisplayComponent : juce::Component, juce::AudioProcessorParameter::Listen
 
     void parameterValueChanged(int parameterIndex, float newValue) override;
     void parameterGestureChanged(int parameterIndex, bool gestureIsStarting) override {} // not implemented
+    juce::Atomic<bool> parametersChanged{ false };
     void timerCallback() override;
 
     void paint(juce::Graphics& g) override;
     void resized() override;
+
+    bool isEnabled = true;
+    bool isHQ = true;
+    juce::Atomic<bool> hasQualityChanged{ true };
 private:
     GnomeDistortAudioProcessor& audioProcessor;
 
-    juce::Atomic<bool> parametersChanged{ false };
     void updateSettings();
     MonoChain monoChain;
 

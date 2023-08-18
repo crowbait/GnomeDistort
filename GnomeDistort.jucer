@@ -20,11 +20,15 @@
     </GROUP>
     <GROUP id="{90ED5E9F-AA5E-20A2-C944-3AE53E8FFA07}" name="Source">
       <GROUP id="{2A901812-6B5E-9B86-6E49-E4ACD7A65DC1}" name="UI">
-        <FILE id="WqL9Bk" name="Colors.h" compile="0" resource="0" file="Source/UI/Colors.h"/>
+        <FILE id="WqL9Bk" name="GlobalConsts.h" compile="0" resource="0" file="Source/UI/GlobalConsts.h"/>
         <FILE id="ZOW6t5" name="DisplayComponent.cpp" compile="1" resource="0"
               file="Source/UI/DisplayComponent.cpp"/>
         <FILE id="AvSAos" name="DisplayComponent.h" compile="0" resource="0"
               file="Source/UI/DisplayComponent.h"/>
+        <FILE id="SDNUfa" name="SimpleTextSwitch.cpp" compile="1" resource="0"
+              file="Source/UI/SimpleTextSwitch.cpp"/>
+        <FILE id="cvmJAI" name="SimpleTextSwitch.h" compile="0" resource="0"
+              file="Source/UI/SimpleTextSwitch.h"/>
         <FILE id="UlAP7y" name="SliderKnobLabeledValue.cpp" compile="1" resource="0"
               file="Source/UI/SliderKnobLabeledValue.cpp"/>
         <FILE id="ZsFi74" name="SliderKnobLabeledValue.h" compile="0" resource="0"

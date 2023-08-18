@@ -31,13 +31,7 @@ leftPreFifo(&audioProcessor.leftPreProcessingFifo), leftPostFifo(&audioProcessor
         }
     }
 
-    preFFTDataGenerator.changeOrder(FFTOrder::order4096);
-    postFFTDataGenerator.changeOrder(FFTOrder::order8192);
-    preBuffer.setSize(1, preFFTDataGenerator.getFFTSize());
-    postBuffer.setSize(1, postFFTDataGenerator.getFFTSize());
-
     updateSettings();
-    startTimerHz(50);   // timer for repaint
 }
 DisplayComponent::~DisplayComponent() {
     const auto& params = audioProcessor.getParameters();
@@ -141,12 +135,14 @@ void DisplayComponent::paint(juce::Graphics& g) {
     g.drawImage(background, displayArea.toFloat());
 
     // draw signals
-    g.setColour(COLOR_KNOB);
-    postFFTPath.applyTransform(AffineTransform().translation(analysisArea.getX(), analysisArea.getY()));
-    g.strokePath(postFFTPath, PathStrokeType(2.f));
-    g.setColour(COLOR_BG_MID);
-    preFFTPath.applyTransform(AffineTransform().translation(analysisArea.getX(), analysisArea.getY()));
-    g.strokePath(preFFTPath, PathStrokeType(2.f));
+    if (isEnabled) {
+        g.setColour(COLOR_KNOB);
+        postFFTPath.applyTransform(AffineTransform().translation(analysisArea.getX(), analysisArea.getY()));
+        g.strokePath(postFFTPath, PathStrokeType(2.f));
+        g.setColour(COLOR_BG_MID);
+        preFFTPath.applyTransform(AffineTransform().translation(analysisArea.getX(), analysisArea.getY()));
+        g.strokePath(preFFTPath, PathStrokeType(2.f));
+    }
 
     auto& loCut = monoChain.get<ChainPositions::LoCut>();
     auto& peak = monoChain.get<ChainPositions::Peak>();
@@ -205,6 +201,16 @@ void DisplayComponent::updateSettings() {
     updateCoefficients(monoChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
     auto hiCoefficients = generateHiCutFilter(chainSettings, audioProcessor.getSampleRate());
     updateCutFilter(monoChain.get<ChainPositions::HiCut>(), hiCoefficients, static_cast<FilterSlope>(chainSettings.HiCutSlope));
+
+    if (hasQualityChanged.compareAndSetBool(false, true)) {
+        preFFTDataGenerator.changeOrder(isHQ ? FFTOrder::order8192 : FFTOrder::order2048);
+        postFFTDataGenerator.changeOrder(isHQ ? FFTOrder::order8192 : FFTOrder::order2048);
+        preBuffer.setSize(1, preFFTDataGenerator.getFFTSize());
+        postBuffer.setSize(1, postFFTDataGenerator.getFFTSize());
+
+        stopTimer();
+        startTimerHz(isHQ ? 60 : 24);   // timer for repaint
+    }
 }
 
 void DisplayComponent::parameterValueChanged(int parameterIndex, float newValue) {

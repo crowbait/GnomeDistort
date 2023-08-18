@@ -77,7 +77,6 @@ template<typename ChainType, typename CoefficientsType> static void updateCutFil
 
 std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, float& amount);
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
-void updateSettings(ChainSettings& chainSettings, double sampleRate, MonoChain& leftChain, MonoChain& rightChain);
 
 //==============================================================================
 /**

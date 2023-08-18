@@ -10,9 +10,10 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
-#include "UI/Colors.h"
+#include "UI/GlobalConsts.h"
 #include "UI/DisplayComponent.h"
 #include "UI/SliderKnobLabeledValue.h"
+#include "UI/SimpleTextSwitch.h"
 
 struct CustomSelect : juce::ComboBox {
     CustomSelect() : juce::ComboBox() {
@@ -40,7 +41,9 @@ enum compIndex {
     HiCutSlopeSelect,
     WaveshapeSelect,
 
-    displayComp
+    displayComp,
+    DisplayONSwitch,
+    DisplayHQSwitch
 };
 
 class GnomeDistortAudioProcessorEditor : public juce::AudioProcessorEditor {
@@ -57,16 +60,16 @@ private:
     // access the processor object that created it.
     GnomeDistortAudioProcessor& audioProcessor;
 
+    DisplayComponent displayComp;
     SliderKnobLabeledValues LoCutFreqSlider, PeakFreqSlider, PeakGainSlider, PeakQSlider, HiCutFreqSlider, PreGainSlider, BiasSlider, WaveShapeAmountSlider, PostGainSlider, DryWetSlider;
     CustomSelect LoCutSlopeSelect, HiCutSlopeSelect, WaveshapeSelect;
-    DisplayComponent displayComp;
+    SimpleTextSwitch DisplayONSwitch, DisplayHQSwitch;
 
     using APVTS = juce::AudioProcessorValueTreeState;
-    using SliderAttachment = APVTS::SliderAttachment;
-    using SelectAttachment = APVTS::ComboBoxAttachment;
-    SliderAttachment LoCutFreqSliderAttachment, PeakFreqSliderAttachment, PeakGainSliderAttachment, PeakQSliderAttachment,
+    APVTS::SliderAttachment LoCutFreqSliderAttachment, PeakFreqSliderAttachment, PeakGainSliderAttachment, PeakQSliderAttachment,
         HiCutFreqSliderAttachment, PreGainSliderAttachment, BiasSliderAttachment, WaveShapeAmountSliderAttachment, PostGainSliderAttachment, DryWetSliderAttachment;
-    SelectAttachment LoCutSlopeSelectAttachment, HiCutSlopeSelectAttachment, WaveshapeSelectAttachment;
+    APVTS::ComboBoxAttachment LoCutSlopeSelectAttachment, HiCutSlopeSelectAttachment, WaveshapeSelectAttachment;
+    APVTS::ButtonAttachment DisplayONAttachment, DisplayHQAttachment;
 
     std::vector<juce::Component*> getComponents();
 

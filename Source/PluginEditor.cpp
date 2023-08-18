@@ -21,6 +21,8 @@ GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortA
     WaveShapeAmountSlider(*audioProcessor.apvts.getParameter("WaveShapeAmount"), false, "DIST AMOUNT", true, knobOverlay),
     PostGainSlider(*audioProcessor.apvts.getParameter("PostGain"), false, "GAIN", true, knobOverlay),
     DryWetSlider(*audioProcessor.apvts.getParameter("DryWet"), false, "MIX", true, knobOverlay),
+    DisplayONSwitch(*audioProcessor.apvts.getParameter("DisplayON"), false, "ON", juce::Colours::white, COLOR_BG_VERYDARK),
+    DisplayHQSwitch(*audioProcessor.apvts.getParameter("DisplayHQ"), false, "HQ", "LQ", juce::Colours::white, COLOR_BG_VERYDARK),
 
     displayComp(audioProcessor),    // init display
 
@@ -36,7 +38,9 @@ GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortA
     DryWetSliderAttachment(audioProcessor.apvts, "DryWet", DryWetSlider),
     LoCutSlopeSelectAttachment(audioProcessor.apvts, "LoCutSlope", LoCutSlopeSelect),
     HiCutSlopeSelectAttachment(audioProcessor.apvts, "HiCutSlope", HiCutSlopeSelect),
-    WaveshapeSelectAttachment(audioProcessor.apvts, "WaveShapeFunction", WaveshapeSelect) {
+    WaveshapeSelectAttachment(audioProcessor.apvts, "WaveShapeFunction", WaveshapeSelect),
+    DisplayONAttachment(audioProcessor.apvts, "DisplayON", DisplayONSwitch),
+    DisplayHQAttachment(audioProcessor.apvts, "DisplayHQ", DisplayHQSwitch) {
 
     juce::StringArray slopeOptions = GnomeDistortAudioProcessor::getSlopeOptions();
     LoCutSlopeSelect.addItemList(slopeOptions, 1);
@@ -54,6 +58,20 @@ GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortA
     for (auto* comp : getComponents()) {
         addAndMakeVisible(comp);
     }
+
+    // add onclicks for switches
+    auto safePtr = juce::Component::SafePointer<GnomeDistortAudioProcessorEditor>(this);
+    DisplayONSwitch.onClick = [safePtr]() {
+        if (auto* comp = safePtr.getComponent()) comp->displayComp.isEnabled = comp->DisplayONSwitch.getToggleState();
+    };
+    DisplayHQSwitch.onClick = [safePtr]() {
+        if (auto* comp = safePtr.getComponent()) {
+            bool state = comp->DisplayHQSwitch.getToggleState();
+            comp->displayComp.isHQ = state;
+            comp->displayComp.parametersChanged.set(true);
+            comp->displayComp.hasQualityChanged.set(true);
+        }
+    };
 
     setSize(400, 600);
 }
@@ -246,7 +264,7 @@ void GnomeDistortAudioProcessorEditor::resized() {
 
     auto bounds = getLocalBounds();
     bounds.removeFromLeft(padding * 2);
-    bounds.removeFromTop(padding * 2);
+    auto switchesArea = bounds.removeFromTop(padding * 2);
     bounds.removeFromRight(padding * 2);
     bounds.removeFromBottom(padding * 2);
 
@@ -256,6 +274,9 @@ void GnomeDistortAudioProcessorEditor::resized() {
     displayArea.removeFromTop(padding);
     displayArea.removeFromBottom(padding * 2);
     displayComp.setBounds(displayArea);    // 25%
+    DisplayONSwitch.setBounds(switchesArea.removeFromLeft(padding * 2));
+    switchesArea.removeFromLeft(padding / 2);
+    DisplayHQSwitch.setBounds(switchesArea.removeFromLeft(padding * 2));
 
     auto filterArea = bounds.removeFromTop(bounds.getHeight() * 0.33f);      // 75*0.33=25%
     auto leftFilterArea = filterArea.removeFromLeft(filterArea.getWidth() * 0.25f);
@@ -281,7 +302,7 @@ void GnomeDistortAudioProcessorEditor::resized() {
     BiasSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.33f));
     WaveshapeSelect.setBounds(bounds.removeFromBottom(selectHeight));
     WaveShapeAmountSlider.setBounds(bounds);
-
+    
     paintBackground();
 }
 
@@ -302,6 +323,8 @@ std::vector<juce::Component*> GnomeDistortAudioProcessorEditor::getComponents() 
         &HiCutSlopeSelect,
         &WaveshapeSelect,
 
-        &displayComp
+        &displayComp,
+        &DisplayONSwitch,
+        &DisplayHQSwitch
     };
 }

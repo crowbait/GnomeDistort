@@ -366,6 +366,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout GnomeDistortAudioProcessor::
     layout.add(std::make_unique<juce::AudioParameterFloat>("PostGain", "PostGain", juce::NormalisableRange<float>(-32.f, 8.f, 0.5f, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("DryWet", "DryWet", juce::NormalisableRange<float>(0.f, 1.f, 0.01f, 1.f), 1.f));
 
+    layout.add(std::make_unique<juce::AudioParameterBool>("DisplayON", "DisplayON", true));
+    layout.add(std::make_unique<juce::AudioParameterBool>("DisplayHQ", "DisplayHQ", true));
+
     return layout;
 }
 
