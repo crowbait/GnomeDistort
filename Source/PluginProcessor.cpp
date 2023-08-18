@@ -117,7 +117,7 @@ std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, floa
             return [amount](float x) { return juce::jlimit(-1.f, 1.f, x * sqrt(1 + ((amount * 5) * (amount * 5)))); };
             break;
         case Cracked:   // x³ * cos(x*a)³ - scaling factor 9.4
-            return [amount](float x) { return pow(x, 3) * pow((cos(x * amount * 9.4f)), 3); };
+            return [amount](float x) { return juce::jlimit(-1.f, 1.f, (float)(pow(x, 3) * pow((cos(x * amount * 9.4f)), 3))); };
             break;
         case Jericho:   // x - (a/t)
             return [amount](float x) { return juce::jlimit(-1.f, 1.f, x - (amount / x)); };
@@ -131,7 +131,7 @@ std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, floa
             int numSteps = 1 + std::floor((1 / (amount + 0.01f))*2);
             return [numSteps](float x) {
                 int quant = (std::min(numSteps, (int)(std::abs(x * numSteps))));
-                return (float)(x < 0 ? (0 - ((1.f / numSteps) * quant)) : ((1.f / numSteps) * quant));
+                return juce::jlimit(-1.f, 1.f, (float)(x < 0 ? (0 - ((1.f / numSteps) * quant)) : ((1.f / numSteps) * quant)));
             }; break;
     }
 }
