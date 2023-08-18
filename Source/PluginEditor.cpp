@@ -160,13 +160,25 @@ void GnomeDistortAudioProcessorEditor::paintBackground() {
     g.setColour(COLOR_KNOB);
     g.strokePath(circuit, PathStrokeType(5.f));
 
+    if (auto* BiasSlider = dynamic_cast<SliderKnobLabeledValues*>(comps[compIndex::BiasSlider])) {
+        auto logoGnome = Drawable::createFromImageData(BinaryData::logo_gnome_svg, BinaryData::logo_gnome_svgSize);
+        Rectangle<float> logoGnomeBox(
+            Point<float>(compCenters[compIndex::PreGainSlider].getX() + 4,
+                         midYQBias + 4),
+            Point<float>(compCenters[compIndex::BiasSlider].getX() - (BiasSlider->getSliderBounds(BiasSlider->getLocalBounds()).getWidth() / 4),
+                         compCenters[compIndex::BiasSlider].getY() - (comps[compIndex::BiasSlider]->getHeight() / 8)));
+        logoGnome->drawWithin(g, logoGnomeBox, RectanglePlacement::stretchToFit, 1.f);
 
-
-    g.drawImageAt(juce::ImageCache::getFromMemory(BinaryData::logo_gnome_png, BinaryData::logo_gnome_pngSize),
-                  compCenters[compIndex::PreGainSlider].getX() + 4, midYQBias + 3, false);
-    g.drawImageAt(juce::ImageCache::getFromMemory(BinaryData::logo_distort_png, BinaryData::logo_distort_pngSize),
-                  compCenters[compIndex::PeakQSlider].getX() - 8, midYQBias + 4, false);
-
+        if (auto* PostGain = dynamic_cast<SliderKnobLabeledValues*>(comps[compIndex::PostGainSlider])) {
+            auto logoDistort = Drawable::createFromImageData(BinaryData::logo_distort_svg, BinaryData::logo_distort_svgSize);
+            Rectangle<float> logoDistBox(
+                Point<float>(compCenters[compIndex::PeakQSlider].getX() - 8,
+                             midYQBias + 4),
+                Point<float>(compCenters[compIndex::PostGainSlider].getX() + (PostGain->getSliderBounds(PostGain->getLocalBounds()).getWidth() / 2),
+                             compCenters[compIndex::PostGainSlider].getY() - (PostGain->getSliderBounds(PostGain->getLocalBounds()).getHeight() / 2) - 8));
+            logoDistort->drawWithin(g, logoDistBox, RectanglePlacement::stretchToFit, 1.f);
+        }
+    }
 
     // draw display 3D
     auto get3DCorners = [](Rectangle<int> bounds, float edgeLength) {
