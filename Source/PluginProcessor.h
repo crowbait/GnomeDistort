@@ -24,7 +24,8 @@ enum WaveShaperFunction {
     Cracked,
     Jericho,
     Warm,
-    Quantize
+    Quantize,
+    Fuzz
 };
 
 struct ChainSettings {
