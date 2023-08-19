@@ -106,7 +106,8 @@ juce::StringArray GnomeDistortAudioProcessor::getWaveshaperOptions() {
         "Jericho",
         "Warm",
         "Quantize",
-        "Fuzz"
+        "Fuzz",
+        "Hollowing"
     };
 }
 std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, float& amount) {
@@ -120,7 +121,7 @@ std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, floa
         case Cracked:   // x³ * cos(x*a)³ - scaling factor 9.4
             return [amount](float x) { return juce::jlimit(-1.f, 1.f, (float)(pow(x, 3) * pow((cos(x * amount * 9.4f)), 3))); };
             break;
-        case Jericho:   // x - (a/t)
+        case Jericho:   // x - (a/x)
             return [amount](float x) { return juce::jlimit(-1.f, 1.f, x - (amount / x)); };
             break;
         case Warm:      // x < 0: x*a   --  x > 0: x*(1+a)
@@ -137,6 +138,9 @@ std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, floa
         } break;
         case Fuzz:      // x + (a * sin(10*a*x))
             return [amount](float x) { return juce::jlimit(-1.f, 1.f, x + (amount * sin(10 * amount * x))); };
+            break;
+        case Hollowing:
+            return [amount](float x) { return juce::jlimit(-1.f, 1.f, x*(3*amount*sin(x))-x-amount); };
             break;
     }
 }
