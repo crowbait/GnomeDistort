@@ -52,10 +52,21 @@ GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortA
     WaveshapeSelect.addItemList(GnomeDistortAudioProcessor::getWaveshaperOptions(), 1);
     WaveshapeSelect.setSelectedId(1);
 
+    LoCutSlopeSelect.setLookAndFeel(&ComboBoxLNF);
+    HiCutSlopeSelect.setLookAndFeel(&ComboBoxLNF);
+    WaveshapeSelect.setLookAndFeel(&ComboBoxLNF);
+    ComboBoxLNF.setColour(juce::ComboBox::ColourIds::backgroundColourId, COLOR_BG_DARK);
+    ComboBoxLNF.setColour(juce::ComboBox::ColourIds::textColourId, juce::Colours::white);
+    ComboBoxLNF.setColour(juce::ComboBox::ColourIds::outlineColourId, COLOR_BG_VERYDARK);
+    ComboBoxLNF.setColour(juce::ComboBox::ColourIds::arrowColourId, COLOR_BG_LIGHT);
+    ComboBoxLNF.setColour(juce::ComboBox::ColourIds::arrowColourId, COLOR_KNOB);
+    ComboBoxLNF.setColour(juce::PopupMenu::ColourIds::backgroundColourId, COLOR_BG_MIDDARK);
+    ComboBoxLNF.setColour(juce::PopupMenu::ColourIds::textColourId, juce::Colours::white);
+
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 
-    knobOverlay = juce::ImageCache::getFromMemory(BinaryData::knob_overlay_128_png, BinaryData::knob_overlay_128_pngSize);
+    knobOverlay = juce::ImageCache::getFromMemory(BinaryData::knob_overlay_128_png, BinaryData::knob_overlay_128_pngSize);  
 
     for (auto* comp : getComponents()) {
         addAndMakeVisible(comp);
@@ -260,7 +271,7 @@ void GnomeDistortAudioProcessorEditor::paintBackground() {
                 outerBounds.getX() + (outerBounds.getWidth() / 4), outerBounds.getY(), true);
             g.setGradientFill(lighten);
             g.fillPath(outer);
-        } else if (auto* slct = dynamic_cast<CustomSelect*>(comp)) {
+        } else if (auto* slct = dynamic_cast<ComboBox*>(comp)) {
             auto displayCorners = get3DCorners(slct->getBounds(), 4.f);
             g.setColour(COLOR_BG_DARK);
             g.fillPath(displayCorners[0]);

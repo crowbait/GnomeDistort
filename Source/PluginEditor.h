@@ -16,16 +16,6 @@
 #include "UI/SimpleTextSwitch.h"
 #include "UI/SimpleTextButton.h"
 
-struct CustomSelect : juce::ComboBox {
-    CustomSelect() : juce::ComboBox() {
-
-    }
-};
-
-// =======================================================
-// =======================================================
-// =======================================================
-
 enum compIndex {
     LoCutFreqSlider,
     PeakFreqSlider,
@@ -63,9 +53,10 @@ private:
     // access the processor object that created it.
     GnomeDistortAudioProcessor& audioProcessor;
 
+    juce::LookAndFeel_V4 ComboBoxLNF;
     DisplayComponent displayComp;
     SliderKnobLabeledValues LoCutFreqSlider, PeakFreqSlider, PeakGainSlider, PeakQSlider, HiCutFreqSlider, PreGainSlider, BiasSlider, WaveShapeAmountSlider, PostGainSlider, DryWetSlider;
-    CustomSelect LoCutSlopeSelect, HiCutSlopeSelect, WaveshapeSelect;
+    juce::ComboBox LoCutSlopeSelect, HiCutSlopeSelect, WaveshapeSelect;
     SimpleTextSwitch DisplayONSwitch, DisplayHQSwitch;
     SimpleTextButton LinkGithubButton, LinkDonateButton;
 
