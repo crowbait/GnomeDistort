@@ -23,6 +23,8 @@ GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortA
     DryWetSlider(*audioProcessor.apvts.getParameter("DryWet"), false, "MIX", true, knobOverlay),
     DisplayONSwitch(*audioProcessor.apvts.getParameter("DisplayON"), false, "ON", juce::Colours::white, COLOR_BG_VERYDARK),
     DisplayHQSwitch(*audioProcessor.apvts.getParameter("DisplayHQ"), false, "HQ", "LQ", juce::Colours::white, COLOR_BG_VERYDARK),
+    LinkGithubButton("GITHUB", juce::Colours::lightgrey, false, false),
+    LinkDonateButton("DONATE", juce::Colours::lightgrey, false, false),
 
     displayComp(audioProcessor),    // init display
 
@@ -71,6 +73,12 @@ GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortA
             comp->displayComp.parametersChanged.set(true);
             comp->displayComp.hasQualityChanged.set(true);
         }
+    };
+    LinkGithubButton.onClick = []() {
+        juce::URL("https://github.com/crowbait/GnomeDistort").launchInDefaultBrowser();
+    };
+    LinkDonateButton.onClick = []() {
+        juce::URL("https://ko-fi.com/crowbait").launchInDefaultBrowser();
     };
 
     setSize(400, 600);
@@ -276,8 +284,8 @@ void GnomeDistortAudioProcessorEditor::resized() {
 
     auto bounds = getLocalBounds();
     bounds.removeFromLeft(padding * 2);
-    auto switchesArea = bounds.removeFromTop(padding * 2);
     bounds.removeFromRight(padding * 2);
+    auto switchesArea = bounds.removeFromTop(padding * 2);
     bounds.removeFromBottom(padding * 2);
 
     auto displayArea = bounds.removeFromTop(bounds.getHeight() * 0.25f);
@@ -289,6 +297,8 @@ void GnomeDistortAudioProcessorEditor::resized() {
     DisplayONSwitch.setBounds(switchesArea.removeFromLeft(padding * 2));
     switchesArea.removeFromLeft(padding / 2);
     DisplayHQSwitch.setBounds(switchesArea.removeFromLeft(padding * 2));
+    LinkDonateButton.setBounds(switchesArea.removeFromRight(padding * 5));
+    LinkGithubButton.setBounds(switchesArea.removeFromRight(padding * 5));
 
     auto filterArea = bounds.removeFromTop(bounds.getHeight() * 0.33f);      // 75*0.33=25%
     auto leftFilterArea = filterArea.removeFromLeft(filterArea.getWidth() * 0.25f);
@@ -337,6 +347,8 @@ std::vector<juce::Component*> GnomeDistortAudioProcessorEditor::getComponents() 
 
         &displayComp,
         &DisplayONSwitch,
-        &DisplayHQSwitch
+        &DisplayHQSwitch,
+        &LinkGithubButton,
+        &LinkDonateButton
     };
 }

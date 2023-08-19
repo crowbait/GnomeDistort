@@ -136,10 +136,10 @@ std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, floa
                 return juce::jlimit(-1.f, 1.f, (float)(x < 0 ? (0 - ((1.f / numSteps) * quant)) : ((1.f / numSteps) * quant)));
             };
         } break;
-        case Fuzz:      // x + (a * sin(10*a*x))
+        case Fuzz:      // x + (a * sin(10a * x))
             return [amount](float x) { return juce::jlimit(-1.f, 1.f, x + (amount * sin(10 * amount * x))); };
             break;
-        case Hollowing:
+        case Hollowing: // x * (3a * sin(x)) - x - a
             return [amount](float x) { return juce::jlimit(-1.f, 1.f, x*(3*amount*sin(x))-x-amount); };
             break;
     }

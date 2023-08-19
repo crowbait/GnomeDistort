@@ -14,6 +14,7 @@
 #include "UI/DisplayComponent.h"
 #include "UI/SliderKnobLabeledValue.h"
 #include "UI/SimpleTextSwitch.h"
+#include "UI/SimpleTextButton.h"
 
 struct CustomSelect : juce::ComboBox {
     CustomSelect() : juce::ComboBox() {
@@ -43,7 +44,9 @@ enum compIndex {
 
     displayComp,
     DisplayONSwitch,
-    DisplayHQSwitch
+    DisplayHQSwitch,
+    LinkGithubButton,
+    LinkDonateButton
 };
 
 class GnomeDistortAudioProcessorEditor : public juce::AudioProcessorEditor {
@@ -64,6 +67,7 @@ private:
     SliderKnobLabeledValues LoCutFreqSlider, PeakFreqSlider, PeakGainSlider, PeakQSlider, HiCutFreqSlider, PreGainSlider, BiasSlider, WaveShapeAmountSlider, PostGainSlider, DryWetSlider;
     CustomSelect LoCutSlopeSelect, HiCutSlopeSelect, WaveshapeSelect;
     SimpleTextSwitch DisplayONSwitch, DisplayHQSwitch;
+    SimpleTextButton LinkGithubButton, LinkDonateButton;
 
     using APVTS = juce::AudioProcessorValueTreeState;
     APVTS::SliderAttachment LoCutFreqSliderAttachment, PeakFreqSliderAttachment, PeakGainSliderAttachment, PeakQSliderAttachment,
