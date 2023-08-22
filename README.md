@@ -3,10 +3,6 @@
 # GnomeDistort
 ## Weird little distortion plugin
 
-<div align="center">
-	<a href='https://ko-fi.com/crowbait' target='_blank'><img height='35' style='border:0px;height:46px;' src='https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
-</div>
-
 ## Features
 
 <div align="center">
@@ -26,8 +22,6 @@ Since I don't know anything about functions usually used with waveshapers and ha
 
 ## Installation
 
-If you like this software, please consider [supporting](https://ko-fi.com/crowbait).
-
 #### Windows
 
 Just grab your `.vst3` file from the [releases page](https://github.com/crowbait/robocopy-gui/releases) and put it into whatever folder you keep your VSTs in.
@@ -46,6 +40,10 @@ So, while this is untested, this plugin should still run well on MacOS - you jus
 - Build from XCode
 
 You <i>should</i> (again, can't test anything) get a perfectly fine AU-formatted plugin.
+
+<div align="center">
+	<a href='https://ko-fi.com/crowbait' target='_blank'><img height='35' style='border:0px;height:46px;' src='https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+</div>
 
 ## Acknowledgements
 
