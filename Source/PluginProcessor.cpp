@@ -103,7 +103,7 @@ juce::StringArray GnomeDistortAudioProcessor::getWaveshaperOptions() {
         "HardClip",
         "SoftClip",
         "Cracked",
-        "Jericho",
+        "GNOME",
         "Warm",
         "Quantize",
         "Fuzz",
@@ -121,7 +121,7 @@ std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, floa
         case Cracked:   // x³ * cos(x*a)³ - scaling factor 9.4
             return [amount](float x) { return juce::jlimit(-1.f, 1.f, (float)(pow(x, 3) * pow((cos(x * amount * 9.4f)), 3))); };
             break;
-        case Jericho:   // x - (a/x)
+        case GNOME:   // x - (a/x)
             return [amount](float x) { return juce::jlimit(-1.f, 1.f, x - (amount / x)); };
             break;
         case Warm:      // x < 0: x*a   --  x > 0: x*(1+a)
