@@ -10,6 +10,7 @@
               pluginAAXCategory="8192">
   <MAINGROUP id="zxk1Cm" name="GnomeDistort">
     <GROUP id="{F0736FEA-2D8E-9919-CABB-D0BD47D99A96}" name="Resources">
+      <FILE id="DCU4R3" name="gnome.png" compile="0" resource="1" file="Assets/gnome.png"/>
       <FILE id="cxIAPL" name="logo_distort.svg" compile="0" resource="1"
             file="Assets/logo_distort.svg"/>
       <FILE id="W2r4qP" name="logo_gnome.svg" compile="0" resource="1" file="Assets/logo_gnome.svg"/>
@@ -91,5 +92,26 @@
         <MODULEPATH id="juce_dsp" path="../.JUCE/modules"/>
       </MODULEPATHS>
     </VS2022>
+    <XCODE_MAC targetFolder="Builds/MacOSX">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="F:\ownCloud\traxx.li\VSTs\.JUCE\modules"/>
+        <MODULEPATH id="juce_audio_devices" path="F:\ownCloud\traxx.li\VSTs\.JUCE\modules"/>
+        <MODULEPATH id="juce_audio_formats" path="F:\ownCloud\traxx.li\VSTs\.JUCE\modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="F:\ownCloud\traxx.li\VSTs\.JUCE\modules"/>
+        <MODULEPATH id="juce_audio_processors" path="F:\ownCloud\traxx.li\VSTs\.JUCE\modules"/>
+        <MODULEPATH id="juce_audio_utils" path="F:\ownCloud\traxx.li\VSTs\.JUCE\modules"/>
+        <MODULEPATH id="juce_core" path="F:\ownCloud\traxx.li\VSTs\.JUCE\modules"/>
+        <MODULEPATH id="juce_data_structures" path="F:\ownCloud\traxx.li\VSTs\.JUCE\modules"/>
+        <MODULEPATH id="juce_dsp" path="F:\ownCloud\traxx.li\VSTs\.JUCE\modules"/>
+        <MODULEPATH id="juce_events" path="F:\ownCloud\traxx.li\VSTs\.JUCE\modules"/>
+        <MODULEPATH id="juce_graphics" path="F:\ownCloud\traxx.li\VSTs\.JUCE\modules"/>
+        <MODULEPATH id="juce_gui_basics" path="F:\ownCloud\traxx.li\VSTs\.JUCE\modules"/>
+        <MODULEPATH id="juce_gui_extra" path="F:\ownCloud\traxx.li\VSTs\.JUCE\modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
   </EXPORTFORMATS>
 </JUCERPROJECT>

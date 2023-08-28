@@ -1,13 +1,14 @@
 <img src="Assets/logo.png" width="100%" />
 
 # GnomeDistort
+
 ## Weird little distortion plugin
 
 ## Features
 
 <div align="center">
-	<img src="Assets/screenshot.png" width="35%" stlye="padding: 8px; float: right;" />
-    <a href='https://youtu.be/rne61x0tvSQ' target='_blank'><img width="35%" stlye="padding: 8px; float: right;" src='https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fyoutu.be%2Frne61x0tvSQ' border='0' alt='Showcase on YouTube' /></a>
+<img src="Assets/screenshot.png" width="35%" stlye="padding: 8px; float: right;" />
+<a href='https://youtu.be/rne61x0tvSQ' target='\_blank'><img width="35%" stlye="padding: 8px; float: right;" src='https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fyoutu.be%2Frne61x0tvSQ' border='0' alt='Showcase on YouTube' /></a>
 </div>
 
 - pre-processing High- and Low-Cut with finely controlled Peak filter
@@ -29,20 +30,19 @@ This plugin is compiled against x64 Windows and is tested on Win10 and Win11. It
 
 #### MacOS
 
-AFAIK, you can only build for MacOS <i>using</i> MacOS and XCode. I tried to get both running in a VM to build this plugin for you - I really tried - but it just didn't want to work. 
+AFAIK, you can only build for MacOS <i>using</i> MacOS and XCode. I tried to get both running in a VM to build this plugin for you - I really tried - but it just didn't want to work.
 <b>If you have an idea on how to build this for MacOS without having an Apple device, let me know!</b>
 
 So, while this is untested, this plugin should still run well on MacOS - you just need to build it yourself:
 
-- Set up JUCE and Projucer (see tutorial video linked at the end of this file - don't worry, you only need to do the first steps)
-- In Projucer, add AU to the plugin formats
-- Change export and IDE to XCode
-- Build from XCode
+- I'm not entirely sure, but I think you don't need to set up JUCE and Projucer to compile your plugin. If that proves to be false, see tutorial video linked at the end of this file - don't worry, you only need to do the first steps. <i>Also: let me know so I can update this README.</i>
+- Open the XCode project from the `Builds/MacOSX` directory
+- Compile the plugin
 
 You <i>should</i> (again, can't test anything) get a perfectly fine AU-formatted plugin.
 
 <div align="center">
-	<a href='https://ko-fi.com/crowbait' target='_blank'><img height='35' style='border:0px;height:46px;' src='https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+<a href='https://ko-fi.com/crowbait' target='\_blank'><img height='35' style='border:0px;height:46px;' src='https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 </div>
 
 ## Acknowledgements
