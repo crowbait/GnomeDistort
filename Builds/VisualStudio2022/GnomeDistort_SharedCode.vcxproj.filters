@@ -6164,7 +6164,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Assets\gnome.png">
+    <None Include="..\..\Assets\gnome_dark.png">
       <Filter>GnomeDistort\Resources</Filter>
     </None>
     <None Include="..\..\Assets\logo_distort.svg">

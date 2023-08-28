@@ -116,8 +116,10 @@ void GnomeDistortAudioProcessorEditor::paintBackground() {
     g.fillRect(getLocalBounds().toFloat());
 
     g.drawImageWithin(
-        juce::ImageCache::getFromMemory(BinaryData::grundge_overlay_png, BinaryData::grundge_overlay_pngSize),
+        ImageCache::getFromMemory(BinaryData::grundge_overlay_png, BinaryData::grundge_overlay_pngSize),
         0, 0, getWidth(), getHeight(), RectanglePlacement::fillDestination, false);
+    Image gnome = ImageCache::getFromMemory(BinaryData::gnome_dark_png, BinaryData::gnome_dark_pngSize);
+    g.drawImageAt(gnome, 0, getHeight() - gnome.getHeight());
 
     auto comps = getComponents();
     std::vector<Point<float>> compCenters;
@@ -127,7 +129,6 @@ void GnomeDistortAudioProcessorEditor::paintBackground() {
         float y = comps[i]->getY() + (comps[i]->getHeight() / 2);
         compCenters[i] = Point(x, y);
     }
-
 
     // draw circuit
     auto getMidX = [comps](compIndex left, compIndex right) {
@@ -284,6 +285,19 @@ void GnomeDistortAudioProcessorEditor::paintBackground() {
         }
     }
 
+
+    // write version info
+    String version = "v.";
+    version << ProjectInfo::versionString;
+    g.setFont(TEXT_NORMAL);
+    g.setColour(juce::Colours::lightgrey);
+    Rectangle<int> versionBox = Rectangle<int>(
+        getWidth() - g.getCurrentFont().getStringWidth(version) - 16,
+        getHeight() - TEXT_NORMAL - 8,
+        g.getCurrentFont().getStringWidth(version) + 16,
+        TEXT_NORMAL + 8
+    );
+    g.drawFittedText(version, versionBox, Justification::centred, 1);
 }
 
 void GnomeDistortAudioProcessorEditor::resized() {

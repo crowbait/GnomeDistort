@@ -3499,7 +3499,7 @@
     <ClInclude Include="..\..\JuceLibraryCode\JucePluginDefines.h"/>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Assets\gnome.png"/>
+    <None Include="..\..\Assets\gnome_dark.png"/>
     <None Include="..\..\Assets\logo_distort.svg"/>
     <None Include="..\..\Assets\logo_gnome.svg"/>
     <None Include="..\..\Assets\grundge_overlay.png"/>

@@ -10,7 +10,7 @@
               pluginAAXCategory="8192">
   <MAINGROUP id="zxk1Cm" name="GnomeDistort">
     <GROUP id="{F0736FEA-2D8E-9919-CABB-D0BD47D99A96}" name="Resources">
-      <FILE id="DCU4R3" name="gnome.png" compile="0" resource="1" file="Assets/gnome.png"/>
+      <FILE id="fqULxq" name="gnome_dark.png" compile="0" resource="1" file="Assets/gnome_dark.png"/>
       <FILE id="cxIAPL" name="logo_distort.svg" compile="0" resource="1"
             file="Assets/logo_distort.svg"/>
       <FILE id="W2r4qP" name="logo_gnome.svg" compile="0" resource="1" file="Assets/logo_gnome.svg"/>

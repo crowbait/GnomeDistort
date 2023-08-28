@@ -110,6 +110,7 @@
 		84954904965D434E8692F568 /* Cocoa.framework */ /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		85282B5BD2C8C396D885B23F /* Info-AU.plist */ /* Info-AU.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Info-AU.plist"; path = "Info-AU.plist"; sourceTree = SOURCE_ROOT; };
 		8698BDF2A94AA756F0C66915 /* juce_core */ /* juce_core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_core; path = "~/JUCE/modules/juce_core"; sourceTree = "<absolute>"; };
+		88694640F9D81034723E19AE /* gnome_dark.png */ /* gnome_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = gnome_dark.png; path = ../../Assets/gnome_dark.png; sourceTree = SOURCE_ROOT; };
 		9004448319097090CAF9CD58 /* include_juce_audio_utils.mm */ /* include_juce_audio_utils.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_utils.mm; path = ../../JuceLibraryCode/include_juce_audio_utils.mm; sourceTree = SOURCE_ROOT; };
 		90697CAEBC7D4B1B7C37E183 /* SimpleTextButton.h */ /* SimpleTextButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SimpleTextButton.h; path = ../../Source/UI/SimpleTextButton.h; sourceTree = SOURCE_ROOT; };
 		9A68F97E68C40538FF6CF993 /* Security.framework */ /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
@@ -128,7 +129,6 @@
 		C5C8A01BCA12E74026443588 /* JuceHeader.h */ /* JuceHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = SOURCE_ROOT; };
 		C81CED3BF1A295792870CC9B /* include_juce_audio_devices.mm */ /* include_juce_audio_devices.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_devices.mm; path = ../../JuceLibraryCode/include_juce_audio_devices.mm; sourceTree = SOURCE_ROOT; };
 		CC633E640CFABF7835BE3F9E /* include_juce_audio_plugin_client_VST3.mm */ /* include_juce_audio_plugin_client_VST3.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_plugin_client_VST3.mm; path = ../../JuceLibraryCode/include_juce_audio_plugin_client_VST3.mm; sourceTree = SOURCE_ROOT; };
-		CCA9D9ECAFF252C8A92F3D7D /* gnome.png */ /* gnome.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = gnome.png; path = ../../Assets/gnome.png; sourceTree = SOURCE_ROOT; };
 		CCF9F643138697D9BAB0354A /* SimpleTextSwitch.cpp */ /* SimpleTextSwitch.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SimpleTextSwitch.cpp; path = ../../Source/UI/SimpleTextSwitch.cpp; sourceTree = SOURCE_ROOT; };
 		CF2EF7FF50181E23FCFDDC27 /* Fifo.h */ /* Fifo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Fifo.h; path = ../../Source/Helpers/Fifo.h; sourceTree = SOURCE_ROOT; };
 		D20980536E4DB0B839B71B79 /* include_juce_dsp.mm */ /* include_juce_dsp.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_dsp.mm; path = ../../JuceLibraryCode/include_juce_dsp.mm; sourceTree = SOURCE_ROOT; };
@@ -330,7 +330,7 @@
 		D57E0EAB5283F25A941484E4 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				CCA9D9ECAFF252C8A92F3D7D,
+				88694640F9D81034723E19AE,
 				129480BE3E35E725C6AF2AF3,
 				DCA05E6B07728B2D47A9F39F,
 				F0687312D0BA503AB0851DBE,
