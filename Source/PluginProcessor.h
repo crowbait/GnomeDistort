@@ -22,7 +22,7 @@ enum WaveShaperFunction {
     HardClip,
     SoftClip,
     Cracked,
-    Jericho,
+    GNOME,
     Warm,
     Quantize,
     Fuzz,
