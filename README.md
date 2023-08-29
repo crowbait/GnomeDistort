@@ -21,6 +21,10 @@ Since I don't know anything about functions usually used with waveshapers and ha
 
 <b>I'm actively interested in new functions; suggest them via issues!</b>
 
+<div align="center">
+	<a href='https://ko-fi.com/crowbait' target='\_blank'><img height='35' style='border:0px;height:46px;' src='https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+</div>
+
 ## Installation
 
 #### Windows
@@ -40,10 +44,6 @@ So, while this is untested, this plugin should still run well on MacOS - you jus
 - Compile the plugin
 
 You <i>should</i> (again, can't test anything) get a perfectly fine AU-formatted plugin.
-
-<div align="center">
-<a href='https://ko-fi.com/crowbait' target='\_blank'><img height='35' style='border:0px;height:46px;' src='https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
-</div>
 
 ## Acknowledgements
 
