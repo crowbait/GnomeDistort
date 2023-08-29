@@ -46,11 +46,11 @@ GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortA
 
     juce::StringArray slopeOptions = GnomeDistortAudioProcessor::getSlopeOptions();
     LoCutSlopeSelect.addItemList(slopeOptions, 1);
-    LoCutSlopeSelect.setSelectedId(1);
+    LoCutSlopeSelect.setSelectedId(audioProcessor.apvts.getRawParameterValue("LoCutSlope")->load() + 1);
     HiCutSlopeSelect.addItemList(slopeOptions, 1);
-    HiCutSlopeSelect.setSelectedId(1);
+    HiCutSlopeSelect.setSelectedId(audioProcessor.apvts.getRawParameterValue("HiCutSlope")->load() + 1);
     WaveshapeSelect.addItemList(GnomeDistortAudioProcessor::getWaveshaperOptions(), 1);
-    WaveshapeSelect.setSelectedId(1);
+    WaveshapeSelect.setSelectedId(audioProcessor.apvts.getRawParameterValue("WaveShapeFunction")->load() + 1);
 
     LoCutSlopeSelect.setLookAndFeel(&ComboBoxLNF);
     HiCutSlopeSelect.setLookAndFeel(&ComboBoxLNF);

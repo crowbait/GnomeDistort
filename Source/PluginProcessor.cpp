@@ -184,6 +184,9 @@ void updateSettings(ChainSettings& chainSettings, double sampleRate, MonoChain& 
         float makeupGain = 16.f * 2 * chainSettings.WaveShapeAmount * chainSettings.WaveShapeAmount;
         leftChain.get<ChainPositions::WaveshaperMakeupGain>().setGainDecibels(makeupGain);
         rightChain.get<ChainPositions::WaveshaperMakeupGain>().setGainDecibels(makeupGain);
+    } else {
+        leftChain.get<ChainPositions::WaveshaperMakeupGain>().setGainDecibels(0);
+        rightChain.get<ChainPositions::WaveshaperMakeupGain>().setGainDecibels(0);
     }
 
     // post-gain
@@ -251,26 +254,16 @@ void GnomeDistortAudioProcessor::releaseResources() {
 
 #ifndef JucePlugin_PreferredChannelConfigurations
 bool GnomeDistortAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const {
-#if JucePlugin_IsMidiEffect
-    juce::ignoreUnused(layouts);
-    return true;
-#else
     // This is the place where you check if the layout is supported.
     // In this template code we only support mono or stereo.
     // Some plugin hosts, such as certain GarageBand versions, will only
     // load plugins that support stereo bus layouts.
+
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
         && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
 
-    // This checks if the input layout matches the output layout
-#if ! JucePlugin_IsSynth
-    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
-        return false;
-#endif
-
     return true;
-#endif
 }
 #endif
 
@@ -324,8 +317,8 @@ bool GnomeDistortAudioProcessor::hasEditor() const {
 
 juce::AudioProcessorEditor* GnomeDistortAudioProcessor::createEditor() {
     // generic interface
-
     //return new juce::GenericAudioProcessorEditor(*this);
+
     return new GnomeDistortAudioProcessorEditor(*this);
 }
 
@@ -334,7 +327,7 @@ void GnomeDistortAudioProcessor::getStateInformation(juce::MemoryBlock& destData
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
-
+    
     juce::MemoryOutputStream mos(destData, true);
     apvts.state.writeToStream(mos);
 }
@@ -342,6 +335,7 @@ void GnomeDistortAudioProcessor::getStateInformation(juce::MemoryBlock& destData
 void GnomeDistortAudioProcessor::setStateInformation(const void* data, int sizeInBytes) {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+
 
     auto state = juce::ValueTree::readFromData(data, sizeInBytes);
     if (state.isValid()) {
