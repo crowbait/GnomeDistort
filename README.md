@@ -2,7 +2,7 @@
 
 # GnomeDistort
 
-## Weird little distortion plugin
+#### Weird little distortion plugin
 
 ## Features
 
