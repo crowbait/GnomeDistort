@@ -29,7 +29,7 @@ Since I don't know anything about functions usually used with waveshapers and ha
 
 #### Windows
 
-Just grab your `.vst3` file from the [releases page](https://github.com/crowbait/robocopy-gui/releases) and put it into whatever folder you keep your VSTs in.
+Just grab your `.vst3` file from the [releases page](https://github.com/crowbait/GnomeDistort/releases) and put it into whatever folder you keep your VSTs in.
 This plugin is compiled against x64 Windows and is tested on Win10 and Win11. It may or may not work on earlier versions.
 
 #### MacOS
