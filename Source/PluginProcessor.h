@@ -40,7 +40,7 @@ using Gain = juce::dsp::Gain<float>;
 using Bias = juce::dsp::Bias<float>;
 using DistWaveShape = juce::dsp::WaveShaper<float, std::function<float(float)>>;
 
-using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter, Gain, Bias, DistWaveShape, Gain, Gain>; // complete effect chain for one channel
+using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter, Gain, Bias, DistWaveShape, Gain>; // complete effect chain for one channel
 enum ChainPositions {
     LoCut,
     Peak,
@@ -48,7 +48,6 @@ enum ChainPositions {
     PreGain,
     DistBias,
     DistWaveshaper,
-    WaveshaperMakeupGain,
     PostGain
 };
 
