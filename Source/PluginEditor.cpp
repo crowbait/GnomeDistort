@@ -92,7 +92,7 @@ GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortA
         juce::URL("https://ko-fi.com/crowbait").launchInDefaultBrowser();
     };
 
-    setSize(400, 600);
+    setSize(420, 600);
 }
 
 //==============================================================================
@@ -115,8 +115,7 @@ void GnomeDistortAudioProcessorEditor::paintBackground() {
     g.setColour(COLOR_BG);
     g.fillRect(getLocalBounds().toFloat());
 
-    g.drawImageWithin(
-        ImageCache::getFromMemory(BinaryData::grundge_overlay_png, BinaryData::grundge_overlay_pngSize),
+    g.drawImageWithin(ImageCache::getFromMemory(BinaryData::grundge_overlay_png, BinaryData::grundge_overlay_pngSize),
         0, 0, getWidth(), getHeight(), RectanglePlacement::fillDestination, false);
     Image gnome = ImageCache::getFromMemory(BinaryData::gnome_dark_png, BinaryData::gnome_dark_pngSize);
     g.drawImageAt(gnome, 0, getHeight() - gnome.getHeight());
@@ -238,7 +237,7 @@ void GnomeDistortAudioProcessorEditor::paintBackground() {
         return std::vector<Path> { topEdge, rightEdge, bottomEdge, leftEdge };
     };
 
-    auto displayCorners = get3DCorners(comps[compIndex::displayComp]->getBounds(), comps[compIndex::displayComp]->getX() / 2);
+    auto displayCorners = get3DCorners(comps[compIndex::displayComp]->getBounds(), 8);
     g.setColour(COLOR_BG_DARK);
     g.fillPath(displayCorners[0]);
     g.setColour(COLOR_BG_MID);
@@ -308,8 +307,8 @@ void GnomeDistortAudioProcessorEditor::resized() {
     const int selectHeight = 24;
 
     auto bounds = getLocalBounds();
-    bounds.removeFromLeft(padding * 2);
-    bounds.removeFromRight(padding * 2);
+    bounds.removeFromLeft(padding);
+    bounds.removeFromRight(padding);
     auto switchesArea = bounds.removeFromTop(padding * 2);
     bounds.removeFromBottom(padding * 2);
 
@@ -324,6 +323,9 @@ void GnomeDistortAudioProcessorEditor::resized() {
     DisplayHQSwitch.setBounds(switchesArea.removeFromLeft(padding * 2));
     LinkDonateButton.setBounds(switchesArea.removeFromRight(padding * 5));
     LinkGithubButton.setBounds(switchesArea.removeFromRight(padding * 5));
+
+    bounds.removeFromLeft(padding);
+    bounds.removeFromRight(padding);
 
     auto filterArea = bounds.removeFromTop(bounds.getHeight() * 0.33f);      // 75*0.33=25%
     auto leftFilterArea = filterArea.removeFromLeft(filterArea.getWidth() * 0.25f);
