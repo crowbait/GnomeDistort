@@ -139,6 +139,7 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\UI\Display.cpp"/>
     <ClCompile Include="..\..\Source\UI\DisplayComponent.cpp"/>
     <ClCompile Include="..\..\Source\UI\SimpleTextSwitch.cpp"/>
     <ClCompile Include="..\..\Source\UI\SliderKnobLabeledValue.cpp"/>
@@ -2497,6 +2498,7 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\UI\Display.h"/>
     <ClInclude Include="..\..\Source\UI\SimpleTextButton.h"/>
     <ClInclude Include="..\..\Source\UI\GlobalConsts.h"/>
     <ClInclude Include="..\..\Source\UI\DisplayComponent.h"/>

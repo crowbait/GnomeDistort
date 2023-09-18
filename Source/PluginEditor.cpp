@@ -66,7 +66,7 @@ GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortA
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 
-    knobOverlay = juce::ImageCache::getFromMemory(BinaryData::knob_overlay_128_png, BinaryData::knob_overlay_128_pngSize);  
+    knobOverlay = juce::ImageCache::getFromMemory(BinaryData::knob_overlay_128_png, BinaryData::knob_overlay_128_pngSize);
 
     for (auto* comp : getComponents()) {
         addAndMakeVisible(comp);
@@ -75,14 +75,14 @@ GnomeDistortAudioProcessorEditor::GnomeDistortAudioProcessorEditor(GnomeDistortA
     // add onclicks for switches
     auto safePtr = juce::Component::SafePointer<GnomeDistortAudioProcessorEditor>(this);
     DisplayONSwitch.onClick = [safePtr]() {
-        if (auto* comp = safePtr.getComponent()) comp->displayComp.isEnabled = comp->DisplayONSwitch.getToggleState();
+        if (auto* comp = safePtr.getComponent()) comp->displayComp.DisplayComp.isEnabled = comp->DisplayONSwitch.getToggleState();
     };
     DisplayHQSwitch.onClick = [safePtr]() {
         if (auto* comp = safePtr.getComponent()) {
             bool state = comp->DisplayHQSwitch.getToggleState();
-            comp->displayComp.isHQ = state;
-            comp->displayComp.parametersChanged.set(true);
-            comp->displayComp.hasQualityChanged.set(true);
+            comp->displayComp.DisplayComp.isHQ = state;
+            comp->displayComp.DisplayComp.parametersChanged.set(true);
+            comp->displayComp.DisplayComp.hasQualityChanged.set(true);
         }
     };
     LinkGithubButton.onClick = []() {
@@ -100,7 +100,6 @@ void GnomeDistortAudioProcessorEditor::paint(juce::Graphics& g) {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     // g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
-    // juce::Image background = juce::ImageCache::getFromMemory(BinaryData::bg_png, BinaryData::bg_pngSize);
     g.drawImageAt(background, 0, 0);
 }
 
@@ -116,7 +115,7 @@ void GnomeDistortAudioProcessorEditor::paintBackground() {
     g.fillRect(getLocalBounds().toFloat());
 
     g.drawImageWithin(ImageCache::getFromMemory(BinaryData::grundge_overlay_png, BinaryData::grundge_overlay_pngSize),
-        0, 0, getWidth(), getHeight(), RectanglePlacement::fillDestination, false);
+                      0, 0, getWidth(), getHeight(), RectanglePlacement::fillDestination, false);
     Image gnome = ImageCache::getFromMemory(BinaryData::gnome_dark_png, BinaryData::gnome_dark_pngSize);
     g.drawImageAt(gnome, 0, getHeight() - gnome.getHeight());
 
@@ -351,7 +350,7 @@ void GnomeDistortAudioProcessorEditor::resized() {
     BiasSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.33f));
     WaveshapeSelect.setBounds(bounds.removeFromBottom(selectHeight));
     WaveShapeAmountSlider.setBounds(bounds);
-    
+
     paintBackground();
 }
 

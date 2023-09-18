@@ -11,7 +11,7 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "UI/GlobalConsts.h"
-#include "UI/DisplayComponent.h"
+#include "UI/Display.h"
 #include "UI/SliderKnobLabeledValue.h"
 #include "UI/SimpleTextSwitch.h"
 #include "UI/SimpleTextButton.h"
@@ -54,7 +54,7 @@ private:
     GnomeDistortAudioProcessor& audioProcessor;
 
     juce::LookAndFeel_V4 ComboBoxLNF;
-    DisplayComponent displayComp;
+    Display displayComp;
     SliderKnobLabeledValues LoCutFreqSlider, PeakFreqSlider, PeakGainSlider, PeakQSlider, HiCutFreqSlider, PreGainSlider, BiasSlider, WaveShapeAmountSlider, PostGainSlider, DryWetSlider;
     juce::ComboBox LoCutSlopeSelect, HiCutSlopeSelect, WaveshapeSelect;
     SimpleTextSwitch DisplayONSwitch, DisplayHQSwitch;
