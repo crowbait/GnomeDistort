@@ -10,7 +10,7 @@
 
 #include "Display.h"
 
-Display::Display(GnomeDistortAudioProcessor& p) : audioProcessor(p), DisplayComp(p) {
+Display::Display(GnomeDistortAudioProcessor& p) : audioProcessor(p), DisplayComp(p), Graph(p) {
     for (auto* comp : getComponents()) {
         addAndMakeVisible(comp);
     }
@@ -21,6 +21,7 @@ void Display::resized() {
     using namespace juce;
 
     Rectangle<int> bounds = getLocalBounds();
+    Graph.setBounds(bounds.removeFromRight(bounds.getHeight()));
     DisplayComp.setBounds(bounds);
 }
 
@@ -31,6 +32,7 @@ void Display::paint(juce::Graphics& g) {
 
 std::vector<juce::Component*> Display::getComponents() {
     return {
-        &DisplayComp
+        &DisplayComp,
+        &Graph
     };
 }

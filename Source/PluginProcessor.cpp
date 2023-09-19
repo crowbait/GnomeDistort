@@ -98,18 +98,9 @@ juce::StringArray GnomeDistortAudioProcessor::getSlopeOptions() {
     }
     return result;
 }
-juce::StringArray GnomeDistortAudioProcessor::getWaveshaperOptions() {
-    return {
-        "HardClip",
-        "SoftClip",
-        "Cracked",
-        "GNOME",
-        "Warm",
-        "Quantize",
-        "Fuzz",
-        "Hollowing"
-    };
-}
+
+
+
 std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, float& amount) {
     switch (func) {
         case HardClip:
@@ -358,7 +349,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout GnomeDistortAudioProcessor::
     layout.add(std::make_unique<juce::AudioParameterFloat>("PreGain", "PreGain", juce::NormalisableRange<float>(-8.f, 32.f, 0.5f, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("Bias", "Bias", juce::NormalisableRange<float>(-1.f, 1.f, 0.01f, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("WaveShapeAmount", "WaveShapeAmount", juce::NormalisableRange<float>(0.f, 0.990f, 0.01f, 0.75f), 0.f));
-    layout.add(std::make_unique<juce::AudioParameterChoice>("WaveShapeFunction", "WaveShapeFunction", getWaveshaperOptions(), 0));
+    layout.add(std::make_unique<juce::AudioParameterChoice>("WaveShapeFunction", "WaveShapeFunction", WaveShaperOptions, 0));
     layout.add(std::make_unique<juce::AudioParameterFloat>("PostGain", "PostGain", juce::NormalisableRange<float>(-32.f, 8.f, 0.5f, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("DryWet", "DryWet", juce::NormalisableRange<float>(0.f, 1.f, 0.01f, 1.f), 1.f));
 

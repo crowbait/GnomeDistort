@@ -29,6 +29,35 @@ enum WaveShaperFunction {
     Hollowing
 };
 
+const juce::StringArray WaveShaperOptions = {
+    "HardClip",
+    "SoftClip",
+    "Cracked",
+    "GNOME",
+    "Warm",
+    "Quantize",
+    "Fuzz",
+    "Hollowing"
+};
+
+enum TreeParameter {
+    PosLoCutFreq,
+    PosLoCutSlope,
+    PosPeakFreq,
+    PosPeakGain,
+    PosPeakQ,
+    PosHiCutFreq,
+    PosHiCutSlope,
+    PosPreGain,
+    PosBias,
+    PosWaveShapeAmount,
+    PosWaveShapeFunction,
+    PosPostGain,
+    PosDryWet,
+    PosDisplayON,
+    PosDisplayHQ
+};
+
 struct ChainSettings {
     float LoCutFreq{ 0 }, PeakFreq{ 0 }, PeakGain{ 0 }, PeakQ{ 0 }, HiCutFreq{ 0 }, PreGain{ 0 }, Bias{ 0 }, WaveShapeAmount{ 0 }, PostGain{ 0 }, Mix{ 0 };
     int LoCutSlope{ FilterSlope::Slope12 }, HiCutSlope{ FilterSlope::Slope12 }, WaveShapeFunction{ WaveShaperFunction::HardClip };
@@ -128,7 +157,6 @@ public:
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     juce::AudioProcessorValueTreeState apvts{ *this, nullptr, "Parameters", createParameterLayout() };
     static juce::StringArray getSlopeOptions();
-    static juce::StringArray getWaveshaperOptions();
 
     using BlockType = juce::AudioBuffer<float>;
     SingleChannelSampleFifo<BlockType> leftPreProcessingFifo{ Channel::Left }, leftPostProcessingFifo{ Channel::Left };

@@ -36,6 +36,7 @@
 		3EBB42F25CC764AF687955D3 /* include_juce_core.mm */ = {isa = PBXBuildFile; fileRef = 2E8D4A0E5FDC2F8836FAED95; };
 		3ED9EF314E147B2035C4AEB8 /* CoreMIDI.framework */ = {isa = PBXBuildFile; fileRef = 051E41BE79477ACC8B54F4E0; };
 		4AB7BE058F78F5F411D5CCC1 /* Cocoa.framework */ = {isa = PBXBuildFile; fileRef = 84954904965D434E8692F568; };
+		4C0EA69BEB2859E23C20F138 /* DisplayGraph.cpp */ = {isa = PBXBuildFile; fileRef = D483F7D80133EB61515DEBBC; };
 		4F9A1A3A6342D45BD2A8E01C /* include_juce_graphics.mm */ = {isa = PBXBuildFile; fileRef = DA185EF37FD199A6DAD6BFC9; };
 		58865AD243DAC4CD71DF1141 /* AudioUnit.framework */ = {isa = PBXBuildFile; fileRef = 6F809E6435A71E7353912C32; };
 		5B9310F020B260E645F30FC7 /* include_juce_audio_processors_lv2_libs.cpp */ = {isa = PBXBuildFile; fileRef = B27327FC05DB9B9983FC8F0E; };
@@ -135,6 +136,7 @@
 		CCF9F643138697D9BAB0354A /* SimpleTextSwitch.cpp */ /* SimpleTextSwitch.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SimpleTextSwitch.cpp; path = ../../Source/UI/SimpleTextSwitch.cpp; sourceTree = SOURCE_ROOT; };
 		CF2EF7FF50181E23FCFDDC27 /* Fifo.h */ /* Fifo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Fifo.h; path = ../../Source/Helpers/Fifo.h; sourceTree = SOURCE_ROOT; };
 		D20980536E4DB0B839B71B79 /* include_juce_dsp.mm */ /* include_juce_dsp.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_dsp.mm; path = ../../JuceLibraryCode/include_juce_dsp.mm; sourceTree = SOURCE_ROOT; };
+		D483F7D80133EB61515DEBBC /* DisplayGraph.cpp */ /* DisplayGraph.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DisplayGraph.cpp; path = ../../Source/UI/DisplayGraph.cpp; sourceTree = SOURCE_ROOT; };
 		D77A5B784320F59B2B6C0C87 /* include_juce_audio_plugin_client_AU_2.mm */ /* include_juce_audio_plugin_client_AU_2.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_plugin_client_AU_2.mm; path = ../../JuceLibraryCode/include_juce_audio_plugin_client_AU_2.mm; sourceTree = SOURCE_ROOT; };
 		D81FEDEDAD519B1B97A6E4F1 /* juce_dsp */ /* juce_dsp */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_dsp; path = "~/JUCE/modules/juce_dsp"; sourceTree = "<absolute>"; };
 		DA0EF6F1CE55AC2A0FFE16C0 /* PluginEditor.cpp */ /* PluginEditor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = PluginEditor.cpp; path = ../../Source/PluginEditor.cpp; sourceTree = SOURCE_ROOT; };
@@ -145,6 +147,7 @@
 		E72FD41B6DEABFFE3E5FAA33 /* CoreAudioKit.framework */ /* CoreAudioKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = System/Library/Frameworks/CoreAudioKit.framework; sourceTree = SDKROOT; };
 		E8D5CC00E5CAF2A9EA83AC5E /* include_juce_audio_plugin_client_ARA.cpp */ /* include_juce_audio_plugin_client_ARA.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_audio_plugin_client_ARA.cpp; path = ../../JuceLibraryCode/include_juce_audio_plugin_client_ARA.cpp; sourceTree = SOURCE_ROOT; };
 		EA32B39A0E1A3FFF68E13104 /* juce_audio_formats */ /* juce_audio_formats */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_formats; path = "~/JUCE/modules/juce_audio_formats"; sourceTree = "<absolute>"; };
+		EBB6ADBD5B49B673656B32CC /* DisplayGraph.h */ /* DisplayGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DisplayGraph.h; path = ../../Source/UI/DisplayGraph.h; sourceTree = SOURCE_ROOT; };
 		F0687312D0BA503AB0851DBE /* grundge_overlay.png */ /* grundge_overlay.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = grundge_overlay.png; path = ../../Assets/grundge_overlay.png; sourceTree = SOURCE_ROOT; };
 		F0DCAB80B3957A200C91E549 /* DisplayComponent.h */ /* DisplayComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DisplayComponent.h; path = ../../Source/UI/DisplayComponent.h; sourceTree = SOURCE_ROOT; };
 		F57EB51E668FF879DA83AF43 /* juce_data_structures */ /* juce_data_structures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_data_structures; path = "~/JUCE/modules/juce_data_structures"; sourceTree = "<absolute>"; };
@@ -285,6 +288,8 @@
 		5FCB18EA812D1F8D09178E36 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				EBB6ADBD5B49B673656B32CC,
+				D483F7D80133EB61515DEBBC,
 				27BC2EBC136BB7CD0456EF7B,
 				1A3495BFF0B940E5CADA8BE9,
 				90697CAEBC7D4B1B7C37E183,
@@ -630,6 +635,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C0EA69BEB2859E23C20F138,
 				2BA213082A23FB1C83711840,
 				97CE7A6B8F24AEC9E5DCC5EC,
 				DA96A88FB9C2B5F5ED92B682,
@@ -798,7 +804,7 @@
 					"JucePlugin_ARAContentTypes=0",
 					"JucePlugin_ARATransformationFlags=0",
 					"JucePlugin_ARAFactoryID=\\\"com.Crowbait.GnomeDistort.factory\\\"",
-					"JucePlugin_ARADocumentArchiveID=\\\"com.Crowbait.GnomeDistort.aradocumentarchive.1.0.0\\\"",
+					"JucePlugin_ARADocumentArchiveID=\\\"com.Crowbait.GnomeDistort.aradocumentarchive.1.1.0\\\"",
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
@@ -914,7 +920,7 @@
 					"JucePlugin_ARAContentTypes=0",
 					"JucePlugin_ARATransformationFlags=0",
 					"JucePlugin_ARAFactoryID=\\\"com.Crowbait.GnomeDistort.factory\\\"",
-					"JucePlugin_ARADocumentArchiveID=\\\"com.Crowbait.GnomeDistort.aradocumentarchive.1.0.0\\\"",
+					"JucePlugin_ARADocumentArchiveID=\\\"com.Crowbait.GnomeDistort.aradocumentarchive.1.1.0\\\"",
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
@@ -1030,7 +1036,7 @@
 					"JucePlugin_ARAContentTypes=0",
 					"JucePlugin_ARATransformationFlags=0",
 					"JucePlugin_ARAFactoryID=\\\"com.Crowbait.GnomeDistort.factory\\\"",
-					"JucePlugin_ARADocumentArchiveID=\\\"com.Crowbait.GnomeDistort.aradocumentarchive.1.0.0\\\"",
+					"JucePlugin_ARADocumentArchiveID=\\\"com.Crowbait.GnomeDistort.aradocumentarchive.1.1.0\\\"",
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
@@ -1151,7 +1157,7 @@
 					"JucePlugin_ARAContentTypes=0",
 					"JucePlugin_ARATransformationFlags=0",
 					"JucePlugin_ARAFactoryID=\\\"com.Crowbait.GnomeDistort.factory\\\"",
-					"JucePlugin_ARADocumentArchiveID=\\\"com.Crowbait.GnomeDistort.aradocumentarchive.1.0.0\\\"",
+					"JucePlugin_ARADocumentArchiveID=\\\"com.Crowbait.GnomeDistort.aradocumentarchive.1.1.0\\\"",
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
@@ -1262,7 +1268,7 @@
 					"JucePlugin_ARAContentTypes=0",
 					"JucePlugin_ARATransformationFlags=0",
 					"JucePlugin_ARAFactoryID=\\\"com.Crowbait.GnomeDistort.factory\\\"",
-					"JucePlugin_ARADocumentArchiveID=\\\"com.Crowbait.GnomeDistort.aradocumentarchive.1.0.0\\\"",
+					"JucePlugin_ARADocumentArchiveID=\\\"com.Crowbait.GnomeDistort.aradocumentarchive.1.1.0\\\"",
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
@@ -1421,7 +1427,7 @@
 					"JucePlugin_ARAContentTypes=0",
 					"JucePlugin_ARATransformationFlags=0",
 					"JucePlugin_ARAFactoryID=\\\"com.Crowbait.GnomeDistort.factory\\\"",
-					"JucePlugin_ARADocumentArchiveID=\\\"com.Crowbait.GnomeDistort.aradocumentarchive.1.0.0\\\"",
+					"JucePlugin_ARADocumentArchiveID=\\\"com.Crowbait.GnomeDistort.aradocumentarchive.1.1.0\\\"",
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
@@ -1536,7 +1542,7 @@
 					"JucePlugin_ARAContentTypes=0",
 					"JucePlugin_ARATransformationFlags=0",
 					"JucePlugin_ARAFactoryID=\\\"com.Crowbait.GnomeDistort.factory\\\"",
-					"JucePlugin_ARADocumentArchiveID=\\\"com.Crowbait.GnomeDistort.aradocumentarchive.1.0.0\\\"",
+					"JucePlugin_ARADocumentArchiveID=\\\"com.Crowbait.GnomeDistort.aradocumentarchive.1.1.0\\\"",
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
@@ -1701,7 +1707,7 @@
 					"JucePlugin_ARAContentTypes=0",
 					"JucePlugin_ARATransformationFlags=0",
 					"JucePlugin_ARAFactoryID=\\\"com.Crowbait.GnomeDistort.factory\\\"",
-					"JucePlugin_ARADocumentArchiveID=\\\"com.Crowbait.GnomeDistort.aradocumentarchive.1.0.0\\\"",
+					"JucePlugin_ARADocumentArchiveID=\\\"com.Crowbait.GnomeDistort.aradocumentarchive.1.1.0\\\"",
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",

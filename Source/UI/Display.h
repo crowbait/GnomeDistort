@@ -14,12 +14,14 @@
 #include "../PluginProcessor.h"
 #include "GlobalConsts.h"
 #include "DisplayComponent.h"
+#include "DisplayGraph.h"
 
 struct Display : juce::Component {
     Display(GnomeDistortAudioProcessor&);
     ~Display();
 
     DisplayComponent DisplayComp;
+    DisplayGraph Graph;
 
     void paint(juce::Graphics& g) override;
     void resized() override;
