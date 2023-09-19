@@ -133,6 +133,9 @@ std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, floa
         case Hollowing: // x * (3a * sin(x)) - x - a
             return [amount](float x) { return juce::jlimit(-1.f, 1.f, x * (3 * amount * sin(x)) - x - amount); };
             break;
+        case Sin:
+            return [amount](float x) { return juce::jlimit(-1.f, 1.f, 2 * amount * sin(x * 100 * amount) + ((1 - amount) * x)); };
+            break;
     }
 }
 
