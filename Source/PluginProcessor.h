@@ -27,7 +27,8 @@ enum WaveShaperFunction {
     Quantize,
     Fuzz,
     Hollowing,
-    Sin
+    Sin,
+    Rash
 };
 
 const juce::StringArray WaveShaperOptions = {
@@ -39,7 +40,8 @@ const juce::StringArray WaveShaperOptions = {
     "Quantize",
     "Fuzz",
     "Hollowing",
-    "Sin"
+    "Sin",
+    "Rash"
 };
 
 enum TreeParameter {

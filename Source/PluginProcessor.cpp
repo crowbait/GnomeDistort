@@ -136,6 +136,23 @@ std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, floa
         case Sin:
             return [amount](float x) { return juce::jlimit(-1.f, 1.f, 2 * amount * sin(x * 100 * amount) + ((1 - amount) * x)); };
             break;
+        case Rash:             //  -1           -0.8          -0.6          -0.4          -0.2           0            0.2           0.4           0.6           0.8           1
+            const float noise[] = { 2.22f, 3.21f, 1.38f, 0.21f, 3.66f, 1.51f, 3.41f, 2.14f, 2.09f, 0.31f, 1.15f, 3.15f, 2.58f, 0.91f, 1.18f, 4.29f, 3.24f, 0.11f, 0.05f, 2.11f, 1.77f };
+            return [amount, noise](float x) {
+                const float factor =
+                    (x < -0.9f) ? noise[0] : (x < -0.8f) ? noise[1] :
+                    (x < -0.7f) ? noise[2] : (x < -0.6f) ? noise[3] :
+                    (x < -0.5f) ? noise[4] : (x < -0.4f) ? noise[5] :
+                    (x < -0.3f) ? noise[6] : (x < -0.2f) ? noise[7] :
+                    (x < -0.1f) ? noise[8] : (x < 0.f) ? noise[9] :
+                    (x < 0.1f) ? noise[10] : (x < 0.2f) ? noise[11] :
+                    (x < 0.3f) ? noise[12] : (x < 0.4f) ? noise[13] :
+                    (x < 0.5f) ? noise[14] : (x < 0.6f) ? noise[15] :
+                    (x < 0.7f) ? noise[16] : (x < 0.8f) ? noise[17] :
+                    (x < 0.9f) ? noise[18] : (x < 1.f) ? noise[19] : noise[20];
+                return juce::jlimit(-1.f, 1.f, (factor * x * amount) + (x * (1.f - amount)));
+            };
+            break;
     }
 }
 
