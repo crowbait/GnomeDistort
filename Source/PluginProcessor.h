@@ -26,7 +26,42 @@ enum WaveShaperFunction {
     Warm,
     Quantize,
     Fuzz,
-    Hollowing
+    Hollowing,
+    Sin,
+    Rash,
+    Spiked
+};
+
+const juce::StringArray WaveShaperOptions = {
+    "HardClip",
+    "SoftClip",
+    "Cracked",
+    "GNOME",
+    "Warm",
+    "Quantize",
+    "Fuzz",
+    "Hollowing",
+    "Sin",
+    "Rash",
+    "Spiked"
+};
+
+enum TreeParameter {
+    PosLoCutFreq,
+    PosLoCutSlope,
+    PosPeakFreq,
+    PosPeakGain,
+    PosPeakQ,
+    PosHiCutFreq,
+    PosHiCutSlope,
+    PosPreGain,
+    PosBias,
+    PosWaveShapeAmount,
+    PosWaveShapeFunction,
+    PosPostGain,
+    PosDryWet,
+    PosDisplayON,
+    PosDisplayHQ
 };
 
 struct ChainSettings {
@@ -40,7 +75,7 @@ using Gain = juce::dsp::Gain<float>;
 using Bias = juce::dsp::Bias<float>;
 using DistWaveShape = juce::dsp::WaveShaper<float, std::function<float(float)>>;
 
-using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter, Gain, Bias, DistWaveShape, Gain, Gain>; // complete effect chain for one channel
+using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter, Gain, Bias, DistWaveShape, Gain>; // complete effect chain for one channel
 enum ChainPositions {
     LoCut,
     Peak,
@@ -48,7 +83,6 @@ enum ChainPositions {
     PreGain,
     DistBias,
     DistWaveshaper,
-    WaveshaperMakeupGain,
     PostGain
 };
 
@@ -129,7 +163,6 @@ public:
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     juce::AudioProcessorValueTreeState apvts{ *this, nullptr, "Parameters", createParameterLayout() };
     static juce::StringArray getSlopeOptions();
-    static juce::StringArray getWaveshaperOptions();
 
     using BlockType = juce::AudioBuffer<float>;
     SingleChannelSampleFifo<BlockType> leftPreProcessingFifo{ Channel::Left }, leftPostProcessingFifo{ Channel::Left };

@@ -61,7 +61,7 @@ void DisplayComponent::resized() {
 
     // draw frequencies
     Array<float> freqs{
-        20, 30, 50, 100,
+        30, 50, 100,
         200, 500, 1000,
         2000, 5000, 10000, 20000
     };

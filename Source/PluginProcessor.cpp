@@ -98,22 +98,13 @@ juce::StringArray GnomeDistortAudioProcessor::getSlopeOptions() {
     }
     return result;
 }
-juce::StringArray GnomeDistortAudioProcessor::getWaveshaperOptions() {
-    return {
-        "HardClip",
-        "SoftClip",
-        "Cracked",
-        "GNOME",
-        "Warm",
-        "Quantize",
-        "Fuzz",
-        "Hollowing"
-    };
-}
+
+
+
 std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, float& amount) {
     switch (func) {
         case HardClip:
-            return [amount](float x) { return juce::jlimit(0.f - (1.f - amount), 1.f - amount, x); };
+            return [amount](float x) { return juce::jlimit(0.f - (1.f - amount), 1.f - amount, x) + (x < 0 ? -amount : amount); };
             break;
         case SoftClip:  // x * sqrt(1+a²) - scaling factor 5
             return [amount](float x) { return juce::jlimit(-1.f, 1.f, x * sqrt(1 + ((amount * 5) * (amount * 5)))); };
@@ -122,13 +113,13 @@ std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, floa
             return [amount](float x) { return juce::jlimit(-1.f, 1.f, (float)(pow(x, 3) * pow((cos(x * amount * 9.4f)), 3))); };
             break;
         case GNOME:   // x - (a/x)
-            return [amount](float x) { return juce::jlimit(-1.f, 1.f, x - (amount / x)); };
+            return [amount](float x) { return juce::jlimit(-1.f, 1.f, x == 0 ? 0 : x - (amount / x)); };
             break;
         case Warm:      // x < 0: x*a   --  x > 0: x*(1+a)
             return [amount](float x) {
                 if (x <= 0) return juce::jlimit(-1.f, 1.f, x * (1.f - amount));
                 return juce::jlimit(-1.f, 1.f, x * (1.f + amount));
-                }; break;
+            }; break;
         case Quantize: {
             int numSteps = 1 + std::floor((1 / (amount + 0.01f)) * 2);
             return [numSteps](float x) {
@@ -140,8 +131,40 @@ std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, floa
             return [amount](float x) { return juce::jlimit(-1.f, 1.f, x + (amount * sin(10 * amount * x))); };
             break;
         case Hollowing: // x * (3a * sin(x)) - x - a
-            return [amount](float x) { return juce::jlimit(-1.f, 1.f, x*(3*amount*sin(x))-x-amount); };
+            return [amount](float x) { return juce::jlimit(-1.f, 1.f, x * (3 * amount * sin(x)) - x - amount); };
             break;
+        case Sin:
+            return [amount](float x) { return juce::jlimit(-1.f, 1.f, 2 * amount * sin(x * 100 * amount) + ((1 - amount) * x)); };
+            break;
+        case Rash: {      //  -1           -0.8          -0.6          -0.4          -0.2           0            0.2           0.4           0.6           0.8           1
+            const float noise[] = { 2.22f, 3.21f, 1.38f, 0.21f, 3.66f, 1.51f, 3.41f, 2.14f, 2.09f, 0.31f, 1.15f, 3.15f, 2.58f, 0.91f, 1.18f, 4.29f, 3.24f, 0.11f, 0.05f, 2.11f, 1.77f };
+            return [amount, noise](float x) {
+                const float factor =
+                    (x < -0.9f) ? noise[0] : (x < -0.8f) ? noise[1] :
+                    (x < -0.7f) ? noise[2] : (x < -0.6f) ? noise[3] :
+                    (x < -0.5f) ? noise[4] : (x < -0.4f) ? noise[5] :
+                    (x < -0.3f) ? noise[6] : (x < -0.2f) ? noise[7] :
+                    (x < -0.1f) ? noise[8] : (x < 0.f) ? noise[9] :
+                    (x < 0.1f) ? noise[10] : (x < 0.2f) ? noise[11] :
+                    (x < 0.3f) ? noise[12] : (x < 0.4f) ? noise[13] :
+                    (x < 0.5f) ? noise[14] : (x < 0.6f) ? noise[15] :
+                    (x < 0.7f) ? noise[16] : (x < 0.8f) ? noise[17] :
+                    (x < 0.9f) ? noise[18] : (x < 1.f) ? noise[19] : noise[20];
+                return juce::jlimit(-1.f, 1.f, (factor * x * amount) + (x * (1.f - amount)));
+            };
+        } break;
+        case Spiked: {
+            const float pi3p16 = 3 * 3.14159f / 16;
+            return [amount, pi3p16](float x) {
+                float ret;
+                if (x < -pi3p16) return juce::jlimit(-1.f, 1.f, amount + (x * (1.f - amount)));
+                if (x < 0) return juce::jlimit(-1.f, 1.f, (sin(8 * x) * amount) + (x * (1.f - amount)));
+                if (x < 0.25f) return juce::jlimit(-1.f, 1.f, ((sin(10 * x) + 0.25f) * amount) + (x * (1.f - amount)));
+                if (x < 0.5f) return juce::jlimit(-1.f, 1.f, ((sin(10 * x + 1) + 0.25f) * amount) + (x * (1.f - amount)));
+                if (x < 0.75f) return juce::jlimit(-1.f, 1.f, ((sin(10 * x + 2) + 0.25f) * amount) + (x * (1.f - amount)));
+                return juce::jlimit(-1.f, 1.f, x * (1.f - amount) + amount);
+            };
+        } break;
     }
 }
 
@@ -179,15 +202,6 @@ void updateSettings(ChainSettings& chainSettings, double sampleRate, MonoChain& 
     auto& waveShaperFunction = getWaveshaperFunction(waveShapeFunction, chainSettings.WaveShapeAmount);
     leftChain.get<ChainPositions::DistWaveshaper>().functionToUse = waveShaperFunction;
     rightChain.get<ChainPositions::DistWaveshaper>().functionToUse = waveShaperFunction;
-    // makeup-gain after waveshaper for following functions
-    if (waveShapeFunction == WaveShaperFunction::HardClip) {
-        float makeupGain = 16.f * 2 * chainSettings.WaveShapeAmount * chainSettings.WaveShapeAmount;
-        leftChain.get<ChainPositions::WaveshaperMakeupGain>().setGainDecibels(makeupGain);
-        rightChain.get<ChainPositions::WaveshaperMakeupGain>().setGainDecibels(makeupGain);
-    } else {
-        leftChain.get<ChainPositions::WaveshaperMakeupGain>().setGainDecibels(0);
-        rightChain.get<ChainPositions::WaveshaperMakeupGain>().setGainDecibels(0);
-    }
 
     // post-gain
     leftChain.get<ChainPositions::PostGain>().setGainDecibels(chainSettings.PostGain);
@@ -327,7 +341,7 @@ void GnomeDistortAudioProcessor::getStateInformation(juce::MemoryBlock& destData
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
-    
+
     juce::MemoryOutputStream mos(destData, true);
     apvts.state.writeToStream(mos);
 }
@@ -367,7 +381,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout GnomeDistortAudioProcessor::
     layout.add(std::make_unique<juce::AudioParameterFloat>("PreGain", "PreGain", juce::NormalisableRange<float>(-8.f, 32.f, 0.5f, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("Bias", "Bias", juce::NormalisableRange<float>(-1.f, 1.f, 0.01f, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("WaveShapeAmount", "WaveShapeAmount", juce::NormalisableRange<float>(0.f, 0.990f, 0.01f, 0.75f), 0.f));
-    layout.add(std::make_unique<juce::AudioParameterChoice>("WaveShapeFunction", "WaveShapeFunction", getWaveshaperOptions(), 0));
+    layout.add(std::make_unique<juce::AudioParameterChoice>("WaveShapeFunction", "WaveShapeFunction", WaveShaperOptions, 0));
     layout.add(std::make_unique<juce::AudioParameterFloat>("PostGain", "PostGain", juce::NormalisableRange<float>(-32.f, 8.f, 0.5f, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("DryWet", "DryWet", juce::NormalisableRange<float>(0.f, 1.f, 0.01f, 1.f), 1.f));
 

@@ -625,6 +625,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\UI\DisplayGraph.cpp">
+      <Filter>GnomeDistort\Source\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\UI\Display.cpp">
+      <Filter>GnomeDistort\Source\UI</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\UI\DisplayComponent.cpp">
       <Filter>GnomeDistort\Source\UI</Filter>
     </ClCompile>
@@ -3162,6 +3168,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\UI\DisplayGraph.h">
+      <Filter>GnomeDistort\Source\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\UI\Display.h">
+      <Filter>GnomeDistort\Source\UI</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\UI\SimpleTextButton.h">
       <Filter>GnomeDistort\Source\UI</Filter>
     </ClInclude>

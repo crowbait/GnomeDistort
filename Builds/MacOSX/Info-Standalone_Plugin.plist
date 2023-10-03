@@ -14,7 +14,7 @@
     <key>CFBundleDisplayName</key>
     <string>GnomeDistort</string>
     <key>CFBundlePackageType</key>
-    <string>BNDL</string>
+    <string>APPL</string>
     <key>CFBundleSignature</key>
     <string>????</string>
     <key>CFBundleShortVersionString</key>

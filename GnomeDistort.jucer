@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="RuvOwm" name="GnomeDistort" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" version="1.0.0"
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" version="1.1.0"
               companyName="Crowbait" companyCopyright="&#169; 2023 Crowbait"
               companyWebsite="crowbait.de" companyEmail="contact@crowbait.de"
               bundleIdentifier="de.crowbait.gnomedistort" pluginFormats="buildAU,buildVST3"
@@ -21,6 +21,11 @@
     </GROUP>
     <GROUP id="{90ED5E9F-AA5E-20A2-C944-3AE53E8FFA07}" name="Source">
       <GROUP id="{2A901812-6B5E-9B86-6E49-E4ACD7A65DC1}" name="UI">
+        <FILE id="DCedsv" name="DisplayGraph.h" compile="0" resource="0" file="Source/UI/DisplayGraph.h"/>
+        <FILE id="H5Lby4" name="DisplayGraph.cpp" compile="1" resource="0"
+              file="Source/UI/DisplayGraph.cpp"/>
+        <FILE id="xnBnRd" name="Display.h" compile="0" resource="0" file="Source/UI/Display.h"/>
+        <FILE id="u7JRnG" name="Display.cpp" compile="1" resource="0" file="Source/UI/Display.cpp"/>
         <FILE id="aAx2Ad" name="SimpleTextButton.h" compile="0" resource="0"
               file="Source/UI/SimpleTextButton.h"/>
         <FILE id="WqL9Bk" name="GlobalConsts.h" compile="0" resource="0" file="Source/UI/GlobalConsts.h"/>
