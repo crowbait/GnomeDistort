@@ -136,7 +136,7 @@ std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, floa
         case Sin:
             return [amount](float x) { return juce::jlimit(-1.f, 1.f, 2 * amount * sin(x * 100 * amount) + ((1 - amount) * x)); };
             break;
-        case Rash:             //  -1           -0.8          -0.6          -0.4          -0.2           0            0.2           0.4           0.6           0.8           1
+        case Rash: {      //  -1           -0.8          -0.6          -0.4          -0.2           0            0.2           0.4           0.6           0.8           1
             const float noise[] = { 2.22f, 3.21f, 1.38f, 0.21f, 3.66f, 1.51f, 3.41f, 2.14f, 2.09f, 0.31f, 1.15f, 3.15f, 2.58f, 0.91f, 1.18f, 4.29f, 3.24f, 0.11f, 0.05f, 2.11f, 1.77f };
             return [amount, noise](float x) {
                 const float factor =
@@ -152,7 +152,19 @@ std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, floa
                     (x < 0.9f) ? noise[18] : (x < 1.f) ? noise[19] : noise[20];
                 return juce::jlimit(-1.f, 1.f, (factor * x * amount) + (x * (1.f - amount)));
             };
-            break;
+        } break;
+        case Spiked: {
+            const float pi3p16 = 3 * 3.14159f / 16;
+            return [amount, pi3p16](float x) {
+                float ret;
+                if (x < -pi3p16) return juce::jlimit(-1.f, 1.f, amount + (x * (1.f - amount)));
+                if (x < 0) return juce::jlimit(-1.f, 1.f, (sin(8 * x) * amount) + (x * (1.f - amount)));
+                if (x < 0.25f) return juce::jlimit(-1.f, 1.f, ((sin(10 * x) + 0.25f) * amount) + (x * (1.f - amount)));
+                if (x < 0.5f) return juce::jlimit(-1.f, 1.f, ((sin(10 * x + 1) + 0.25f) * amount) + (x * (1.f - amount)));
+                if (x < 0.75f) return juce::jlimit(-1.f, 1.f, ((sin(10 * x + 2) + 0.25f) * amount) + (x * (1.f - amount)));
+                return juce::jlimit(-1.f, 1.f, x * (1.f - amount) + amount);
+            };
+        } break;
     }
 }
 
