@@ -29,12 +29,13 @@ enum WaveShaperFunction {
     Hollowing,
     Sin,
     Rash,
-    Spiked
+    Spiked,
+    Titruff
 };
 
 const juce::StringArray WaveShaperOptions = {
-    "HardClip",
-    "SoftClip",
+    "Hard Clip",
+    "Soft Clip",
     "Cracked",
     "GNOME",
     "Warm",
@@ -43,7 +44,8 @@ const juce::StringArray WaveShaperOptions = {
     "Hollowing",
     "Sin",
     "Rash",
-    "Spiked"
+    "Spiked",
+    "Titruff"
 };
 
 enum TreeParameter {
