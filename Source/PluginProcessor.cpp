@@ -165,6 +165,12 @@ std::function<float(float)> getWaveshaperFunction(WaveShaperFunction& func, floa
                 return juce::jlimit(-1.f, 1.f, x * (1.f - amount) + amount);
             };
         } break;
+        case Titruff: {
+            return [amount](float x) {
+                if (x > -0.162f && x < 0.162f) return ((-10.f * x * x + 1) * amount) + (x * (1.f - amount));
+                return juce::jlimit(-1.f, 1.f, ((-0.5f * x * x + 0.75f) * amount) + (x * (1.f - amount)));
+            }; break;
+        }
     }
 }
 

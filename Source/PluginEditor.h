@@ -69,6 +69,7 @@ private:
     std::vector<juce::Component*> getComponents();
 
     void paintBackground();
+    void checkForUpdates();
     juce::Image background;
     juce::Image knobOverlay;
 
