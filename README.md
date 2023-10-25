@@ -8,8 +8,11 @@
 
 <div align="center">
 	<img src="Assets/screenshot.png" width="35%" stlye="padding: 8px; float: right;" />
-	<a href='https://youtu.be/rne61x0tvSQ' target='\_blank'><img width="35%" stlye="padding: 8px; float: right;" src='https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fyoutu.be%2Frne61x0tvSQ' border='0' alt='Showcase on YouTube' /></a>
+	<a href='https://youtu.be/48COX-nk5wU' target='\_blank'><img width="35%" stlye="padding: 8px; float: right;" src='https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fyoutu.be%2F48COX-nk5wU' border='0' alt='Showcase on YouTube' /></a>
 </div>
+<br />
+
+- [YouTube direct link (showcase)](https://youtu.be/48COX-nk5wU)
 
 - pre-processing High- and Low-Cut with finely controlled Peak filter
 - pre- and post-distortion gain with very high value ranges
