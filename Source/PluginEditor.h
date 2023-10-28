@@ -9,7 +9,6 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "PluginProcessor.h"
 #include "UI/GlobalConsts.h"
 #include "UI/Display.h"
 #include "UI/SliderKnobLabeledValue.h"
