@@ -65,7 +65,10 @@ void DisplayGraph::parameterValueChanged(int parameterIndex, float newValue) {
     if (parameterIndex == TreeParameter::PosWaveShapeFunction) func = juce::jmap(newValue, 0.f, (float)WaveShaperOptions.size() - 1);
     WaveShaperFunction waveShapeFunction = static_cast<WaveShaperFunction>(func);
     waveshaperFunction = getWaveshaperFunction(waveShapeFunction, chainSettings.WaveShapeAmount);
-    repaint();
+    juce::MessageManagerLock mml(juce::Thread::getCurrentThread());
+    if (mml.lockWasGained()) {
+        repaint();
+    } else DBG("No Lock");
 }
 
 juce::Rectangle<int> DisplayGraph::getRenderArea() {

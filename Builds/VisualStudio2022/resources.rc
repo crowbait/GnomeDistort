@@ -9,7 +9,7 @@
 #include <windows.h>
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION  1,2,0,0
+FILEVERSION  1,2,1,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
@@ -18,9 +18,9 @@ BEGIN
       VALUE "CompanyName",  "Crowbait\0"
       VALUE "LegalCopyright",  "© 2023 Crowbait\0"
       VALUE "FileDescription",  "GnomeDistort\0"
-      VALUE "FileVersion",  "1.2.0\0"
+      VALUE "FileVersion",  "1.2.1\0"
       VALUE "ProductName",  "GnomeDistort\0"
-      VALUE "ProductVersion",  "1.2.0\0"
+      VALUE "ProductVersion",  "1.2.1\0"
     END
   END
 
