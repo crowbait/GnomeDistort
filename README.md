@@ -1,3 +1,13 @@
+# ⚠️ Deprecation notice
+
+### This has been entirely superseded by [GnomeDistort 2](https://github.com/crowbait/GnomeDistort-2)
+
+---
+
+---
+
+---
+
 <img src="Assets/logo.png" width="100%" />
 
 # GnomeDistort
